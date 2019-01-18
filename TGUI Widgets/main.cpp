@@ -13,10 +13,9 @@ int main() {
     tgui::Panel::Ptr panel = tgui::Panel::create();
     panel->setSize(800, 600);
 
-    SB::Button().text("Hey").add(panel).small().pos(200, 0);
-    SB::Button().text("Hey").add(panel).medium().pos(200, 200);
-    SB::Button().text("Hey").add(panel).large().pos(200, 400)->setRenderer(
-        SB::defaultTheme.getRenderer("BigButton"));
+    SB::Edit().text("Hey").add(panel).small().pos(200, 0).title("Hey yah");
+    SB::Edit().text("Hey").add(panel).medium().pos(200, 200).title("super long and wierd title");
+    SB::Edit().text("Hey").add(panel).large().pos(200, 400).title("Yo!").title_top();
 
     gui.add(panel);
 

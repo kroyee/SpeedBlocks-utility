@@ -46,7 +46,7 @@ Button.ChildWindowCloseButton {
 }
 
 EditBox {
-    NormalImage = "neutralUIsheet.png" Part(0, 0, 120, 60) Middle(20, 0, 80, 60);
+    Texture = "neutralUIsheet.png" Part(0, 0, 120, 60) Middle(20, 0, 80, 60);
     TextColor = (100, 100, 100);
     SelectedTextColor = (150, 150, 150);
     SelectedTextBackgroundColor = (190, 225, 235);
@@ -98,10 +98,10 @@ RadioButton {
 }
 
 Scrollbar {
-    TrackImage = "neutralUIsheet.png" Part(851, 144, 30, 50) Middle(0, 10, 30, 30);
-    ThumbImage = "neutralUIsheet.png" Part(823, 144, 29, 50) Middle(0, 10, 30, 30);
-    ArrowUpImage = "neutralUIsheet.png" Part(848, 45, 30, 45);
-    ArrowDownImage = "neutralUIsheet.png" Part(848, 0, 30, 45);
+    TextureTrack = "neutralUIsheet.png" Part(851, 144, 30, 50) Middle(0, 10, 30, 30);
+    TextureThumb = "neutralUIsheet.png" Part(823, 144, 29, 50) Middle(0, 10, 30, 30);
+    TextureArrowUp = "neutralUIsheet.png" Part(848, 45, 30, 45);
+    TextureArrowDown = "neutralUIsheet.png" Part(848, 0, 30, 45);
 }
 
 Slider {

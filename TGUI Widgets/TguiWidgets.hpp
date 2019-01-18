@@ -17,9 +17,7 @@ class Widget {
         return static_cast<ReturnType&>(*this);
     }
 
-    ReturnType& pos(const sf::Vector2f& position) {
-        return pos(position.x, position.y);
-    }
+    ReturnType& pos(const sf::Vector2f& position) { return pos(position.x, position.y); }
 
     ReturnType& size(float x, float y) {
         m_widget->setSize(x, y);
@@ -66,13 +64,6 @@ using tgui::bindSize;
 using tgui::bindTop;
 using tgui::bindWidth;
 
-class Button : public TextWidget<tgui::Button, Button> {
-   public:
-    Button& small();
-    Button& medium();
-    Button& large();
-};
-
 class Label : public TextWidget<tgui::Label, Label> {
    public:
     Label& small();
@@ -80,7 +71,63 @@ class Label : public TextWidget<tgui::Label, Label> {
     Label& large();
 };
 
-class Edit : public TextWidget<tgui::EditBox, Edit> {
+template <typename WidgetType>
+class TitledWidget;
+
+template <template <typename, typename> typename WidgetBase, typename WidgetType, typename ReturnType>
+class TitledWidget<WidgetBase<WidgetType, ReturnType>> : public WidgetBase<WidgetType, ReturnType> {
+   public:
+    TitledWidget() { update_title(); }
+
+    ReturnType& title(const std::string& text) {
+        m_title.text(text);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& title_size(unsigned size) {
+        m_title.text_size(size);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& title_top() {
+        m_title_top = true;
+        update_title();
+        return static_cast<ReturnType&>(*this);
+    }
+    ReturnType& title_left() {
+        m_title_top = false;
+        update_title();
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& add(tgui::Panel::Ptr panel) {
+        panel->add(m_title.get());
+        panel->add(this->m_widget);
+        return static_cast<ReturnType&>(*this);
+    }
+
+   protected:
+    Label m_title;
+
+   private:
+    bool m_title_top = false;
+    void update_title() {
+        if (m_title_top)
+            m_title->setPosition(bindLeft(this->m_widget) + (bindWidth(this->m_widget) - bindWidth(m_title.get())) / 2,
+                                 bindTop(this->m_widget) - bindHeight(m_title.get()) - 5);
+        else
+            m_title->setPosition(bindLeft(this->m_widget) - bindWidth(m_title.get()) - 10, bindTop(this->m_widget) + 5);
+    }
+};
+
+class Button : public TextWidget<tgui::Button, Button> {
+   public:
+    Button& small();
+    Button& medium();
+    Button& large();
+};
+
+class Edit : public TitledWidget<TextWidget<tgui::EditBox, Edit>> {
    public:
     Edit(const std::string& title = "");
 
@@ -88,28 +135,8 @@ class Edit : public TextWidget<tgui::EditBox, Edit> {
     Edit& medium();
     Edit& large();
 
-    Edit& title(const std::string& text);
-    Edit& title_size(unsigned size);
-
-    Edit& title_top() {
-        m_title_top = true;
-        update_title();
-        return *this;
-    }
-    Edit& title_left() {
-        m_title_top = false;
-        update_title();
-        return *this;
-    }
-
-    Edit& add(tgui::Panel::Ptr panel);
     Edit& num();
     Edit& pass();
-
-   private:
-    void update_title();
-    Label m_title;
-    bool m_title_top = false;
 };
 
 class CheckBox : public TextWidget<tgui::CheckBox, CheckBox> {
@@ -126,8 +153,25 @@ class RadioButton : public TextWidget<tgui::RadioButton, RadioButton> {
     RadioButton& large();
 };
 
-class ListBox : public Widget<tgui::ListBox, ListBox> {
+class ListBox : public Widget<tgui::ListBox, ListBox> {};
+
+class TextBox : public Widget<tgui::TextBox, TextBox> {};
+
+class ChatBox : public Widget<tgui::ChatBox, ChatBox> {};
+
+class Slider : public TitledWidget<TextWidget<tgui::Slider, Slider>> {
+    Slider& min(float value);
+    Slider& max(float value);
+    Slider& step(float value);
+};
+
+class Panel : public Widget<tgui::Panel, Panel> {
    public:
+    template <typename WType>
+    Panel& add(const WType& widget) {
+        widget.add(m_widget);
+        return *this;
+    }
 };
 
 }  // namespace SB

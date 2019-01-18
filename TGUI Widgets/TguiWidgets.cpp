@@ -15,49 +15,22 @@ Label& Label::large() { return text_size(32); }
 
 Edit::Edit(const std::string& title_) {
     title(title_);
-    update_title();
+    m_widget->setAlignment(tgui::EditBox::Alignment::Center);
 }
 
 Edit& Edit::small() {
-    title_size(16);
+    title_size(18);
     return size(100, 30).text_size(18);
 }
 
 Edit& Edit::medium() {
-    title_size(22);
+    title_size(24);
     return size(150, 40).text_size(24);
 }
 
 Edit& Edit::large() {
-    title_size(30);
+    title_size(32);
     return size(200, 50).text_size(32);
-}
-
-Edit& Edit::title(const std::string& text) {
-    m_title.text(text);
-    return *this;
-}
-
-Edit& Edit::title_size(unsigned size) {
-    m_title.text_size(size);
-    return *this;
-}
-
-void Edit::update_title() {
-    if (m_title_top)
-        m_title->setPosition(
-            bindLeft(m_widget) +
-                (bindWidth(m_widget) - bindWidth(m_title.get())) / 2,
-            bindTop(m_widget) - bindHeight(m_title.get()) - 5);
-    else
-        m_title->setPosition(bindLeft(m_widget) - bindWidth(m_title.get()) - 10,
-                             bindTop(m_widget) + 5);
-}
-
-Edit& Edit::add(tgui::Panel::Ptr panel) {
-    panel->add(m_title.get());
-    panel->add(m_widget);
-    return *this;
 }
 
 Edit& Edit::num() {
@@ -81,4 +54,20 @@ RadioButton& RadioButton::small() { return size(10, 10).text_size(18); }
 RadioButton& RadioButton::medium() { return size(20, 20).text_size(24); }
 
 RadioButton& RadioButton::large() { return size(30, 30).text_size(32); }
+
+Slider& Slider::min(float value) {
+    m_widget->setMinimum(value);
+    return *this;
+}
+
+Slider& Slider::max(float value) {
+    m_widget->setMaximum(value);
+    return *this;
+}
+
+Slider& Slider::step(float value) {
+    m_widget->setStep(value);
+    return *this;
+}
+
 }  // namespace SB
