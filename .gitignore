@@ -10,3 +10,4 @@
 **/.vscode
 **/tgui.widgets
 **/main.cpp
+**/*.exe

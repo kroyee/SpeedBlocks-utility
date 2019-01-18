@@ -1,4 +1,5 @@
 #include <type_traits>
+#include "MyTypeTraits.hpp"
 
 namespace os {
 
@@ -10,11 +11,6 @@ template <class, class...>
 std::false_type test_is_braces_constructible(...);
 template <class T, class... TArgs>
 using is_braces_constructible = decltype(test_is_braces_constructible<T, TArgs...>(0));
-
-struct any_type {
-    template <class T>
-    constexpr operator T();
-};
 
 }  // namespace detail
 

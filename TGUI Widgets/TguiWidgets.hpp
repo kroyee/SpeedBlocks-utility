@@ -3,7 +3,7 @@
 
 #include <TGUI/TGUI.hpp>
 
-namespace SB {
+namespace os {
 
 inline tgui::Theme defaultTheme;
 
@@ -25,6 +25,20 @@ class Widget {
     }
 
     ReturnType& size(const sf::Vector2f& vec) { return size(vec.x, vec.y); }
+
+    ReturnType& width(float w) { return size(w, m_widget->getSize().y); }
+
+    ReturnType& height(float h) { return size(m_widget->getSize().x, h); }
+
+    ReturnType& show() {
+        m_widget->setVisible(false);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& hide() {
+        m_widget->setVisible(true);
+        return static_cast<ReturnType&>(*this);
+    }
 
     ReturnType& add(tgui::Panel::Ptr panel) {
         panel->add(m_widget);
@@ -174,6 +188,6 @@ class Panel : public Widget<tgui::Panel, Panel> {
     }
 };
 
-}  // namespace SB
+}  // namespace os
 
 #endif
