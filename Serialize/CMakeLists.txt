@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.5)
+
+set(EXECUTABLE_NAME serialize)
+
+project(${EXECUTABLE_NAME})
+
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-Wall -Wextra -pedantic -O3")
+
+file(GLOB SOURCE_FILES ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
+
+add_executable(${EXECUTABLE_NAME} ${SOURCE_FILES})
+
+#target_include_directories(${EXECUTABLE_NAME} PUBLIC path_here)
+
+add_custom_target(run
+    COMMAND ${EXECUTABLE_NAME}
+    DEPENDS ${EXECUTABLE_NAME}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
