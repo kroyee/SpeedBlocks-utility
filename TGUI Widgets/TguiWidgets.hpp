@@ -2,6 +2,7 @@
 #define TGUI_WIDGETS
 
 #include <TGUI/TGUI.hpp>
+#include "WidgetAlign.h"
 
 namespace os {
 
@@ -40,10 +41,22 @@ class Widget {
         return static_cast<ReturnType&>(*this);
     }
 
-    ReturnType& add(tgui::Panel::Ptr panel) {
+    ReturnType& enable() {
+        m_widget->setEnabled(true);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& disable() {
+        m_widget->setEnabled(false);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& add_to(Panel panel) {
         panel->add(m_widget);
         return static_cast<ReturnType&>(*this);
     }
+
+    ReturnType& del() { m_widget->getParent()->remove(m_widget); }
 
     typename WidgetType::Ptr& operator->() { return m_widget; }
 
@@ -65,6 +78,15 @@ class TextWidget : public Widget<WidgetType, ReturnType> {
 
     ReturnType& text_size(unsigned size) {
         this->m_widget->setTextSize(size);
+        return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& center() {
+        if constexpr (std::is_same_v < WidgetType, tgui::Label)
+            this->m_widget->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+        else if constexpr (std::is_same_v < WidgetType, tgui::EditBox)
+            this->m_widget->setAlignment(tgui::EditBox::Alignment::Center);
+
         return static_cast<ReturnType&>(*this);
     }
 };
@@ -120,6 +142,8 @@ class TitledWidget<WidgetBase<WidgetType, ReturnType>> : public WidgetBase<Widge
         return static_cast<ReturnType&>(*this);
     }
 
+    ReturnType& bind() {}
+
    protected:
     Label m_title;
 
@@ -139,6 +163,11 @@ class Button : public TextWidget<tgui::Button, Button> {
     Button& small();
     Button& medium();
     Button& large();
+
+    template <typename... T>
+    Button& connect(T&&... t) {
+        m_widget->connect(std::forward<T>(t)...);
+    }
 };
 
 class Edit : public TitledWidget<TextWidget<tgui::EditBox, Edit>> {
@@ -181,10 +210,31 @@ class Slider : public TitledWidget<TextWidget<tgui::Slider, Slider>> {
 
 class Panel : public Widget<tgui::Panel, Panel> {
    public:
-    template <typename WType>
-    Panel& add(const WType& widget) {
-        widget.add(m_widget);
+    template <typename... WType>
+    Panel& add(WType&&... widget) {
+        (std::forward<WType>(widget).add(m_widget), ...);
         return *this;
+    }
+
+    Panel& background();
+
+    Panel& background(const sf::Color& color);
+
+    Align<> align(int x, int y, int gap = 0, bool down = true) { return Align<>(*this, x, y, gap, down); }
+
+    template <typename... T>
+    Align<T...> align(int x, int y, int gap = 0, bool down = true) {
+        return Align<T...>(*this, x, y, gap, down);
+    }
+
+    template <typename W>
+    Align<> under(W& w) {
+        return {w};
+    }
+
+    template <typename W>
+    Align<> right_of(W& w) {
+        return (Align<>{w, 0, false} << Vertical{0});
     }
 };
 

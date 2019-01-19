@@ -11,46 +11,46 @@ struct Property {};
 
 template <int WIDTH, int HEIGHT>
 struct Size : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.size(WIDTH, HEIGHT);
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.size(WIDTH, HEIGHT), ...);
     }
 };
 
 template <int WIDTH>
 struct Width : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.width(WIDTH);
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.width(WIDTH), ...);
     }
 };
 
 template <int HEIGHT>
 struct Height : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.height(HEIGHT);
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.height(HEIGHT), ...);
     }
 };
 
 struct Center : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.pos(w->getPosition().x - w->getSize().x / 2, w->getPosition().y);
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.pos(w->getPosition().x - w->getSize().x / 2, w->getPosition().y), ...);
     }
 };
 
 struct Left : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.pos(w->getPosition().x - w->getSize().x, w->getPosition().y);
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.pos(w->getPosition().x - w->getSize().x, w->getPosition().y), ...);
     }
 };
 
 struct Hide : Property {
-    template <typename W>
-    static void apply(W& w) {
-        w.hide();
+    template <typename... W>
+    static void operator()(W&&... w) {
+        (w.hide(), ...);
     }
 };
 
@@ -62,10 +62,10 @@ constexpr bool has_set_text_size_v = os::detect_v<has_set_text_size, T>;
 
 template <int SIZE>
 struct TextSize : Property {
-    template <typename W>
-    static void apply(W& w) {
+    template <typename... W>
+    static void operator()(W&&... w) {
         if constexpr (has_set_text_size_v<W>) {
-            w.text_size(SIZE);
+            (w.text_size(SIZE), ...);
         }
     }
 };
@@ -99,7 +99,7 @@ template <typename... P>
 struct ApplyProperty {
     template <typename W>
     static void apply(W& w) {
-        (P::apply(w), ...);
+        (P::(w), ...);
     }
 };
 

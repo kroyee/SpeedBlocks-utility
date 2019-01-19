@@ -1,6 +1,7 @@
 #include "TguiWidgets.hpp"
 
-namespace SB {
+namespace os {
+
 Button& Button::small() { return size(100, 30).text_size(18); }
 
 Button& Button::medium() { return size(150, 40).text_size(24); }
@@ -15,7 +16,7 @@ Label& Label::large() { return text_size(32); }
 
 Edit::Edit(const std::string& title_) {
     title(title_);
-    m_widget->setAlignment(tgui::EditBox::Alignment::Center);
+    center();
 }
 
 Edit& Edit::small() {
@@ -42,6 +43,21 @@ Edit& Edit::pass() {
     m_widget->setPasswordCharacter('*');
     return *this;
 }
+
+tgui::Texture get_panel_background() {
+    tgui::Button::Ptr button;
+    button->setRenderer(defaultTheme.getRenderer("PanelBackground"));
+    return button->getRenderer()->getTexture();
+}
+
+Panel& Panel::background() {
+    static auto background = get_panel_background();
+    tgui::Picture::Ptr pic = tgui::Picture::create(background);
+    pic->setSize(tgui::bindSize(m_widget));
+    m_widget->add(pic);
+}
+
+Panel& Panel::background(const sf::Color& color) { m_widget->getRenderer()->setBackgroundColor(color); }
 
 CheckBox& CheckBox::small() { return size(10, 10).text_size(18); }
 
@@ -70,4 +86,4 @@ Slider& Slider::step(float value) {
     return *this;
 }
 
-}  // namespace SB
+}  // namespace os
