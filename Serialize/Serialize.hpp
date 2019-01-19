@@ -8,10 +8,10 @@
 namespace Stream {
 
 template <class Object>
-using has_serialize_impl = decltype(std::declval<Object>().serialize(1));
+using has_serialize = decltype(std::declval<Object>().serialize(1));
 
 template <class T>
-constexpr bool has_serialize_v = os::detect_v<has_serialize_impl, T>;
+constexpr bool has_serialize_v = os::detect_v<has_serialize, T>;
 
 template <class LHS, class RHS>
 using has_left_stream = decltype(std::declval<LHS>() << std::declval<RHS>());
@@ -33,11 +33,11 @@ struct To {
     template <class Object>
     To& operator<<(Object&& object) {
         if constexpr (has_serialize_v<Object>) {
-            object.serialize([&](const auto&... args) { (m_stream << ... << args); });
+            object.serialize([&](const auto&... args) { (*this << ... << args); });
         } else if constexpr (has_left_stream_v<Stream, Object>) {
             m_stream << object;
         } else {
-            os::bind_to_members([&](const auto&... args) { (m_stream << ... << args); }, object);
+            os::bind_to_members([&](const auto&... args) { (*this << ... << args); }, object);
         }
         return *this;
     }
@@ -45,11 +45,11 @@ struct To {
     template <class Object>
     To& operator>>(Object&& object) {
         if constexpr (has_serialize_v<Object>) {
-            object.serialize([&](const auto&... args) { (m_stream >> ... >> args); });
+            object.serialize([&](const auto&... args) { (*this >> ... >> args); });
         } else if constexpr (has_left_stream_v<Stream, Object>) {
             m_stream >> object;
         } else {
-            os::bind_to_members([&](const auto&... args) { (m_stream >> ... >> args); }, object);
+            os::bind_to_members([&](const auto&... args) { (*this >> ... >> args); }, object);
         }
         return *this;
     }

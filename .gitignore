@@ -11,3 +11,4 @@
 **/tgui.widgets
 **/main.cpp
 **/*.exe
+*/**/CMakeLists.txt
