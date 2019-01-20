@@ -50,14 +50,11 @@ tgui::Texture get_panel_background() {
     return button->getRenderer()->getTexture();
 }
 
-Panel& Panel::background() {
-    static auto background = get_panel_background();
-    tgui::Picture::Ptr pic = tgui::Picture::create(background);
-    pic->setSize(tgui::bindSize(m_widget));
-    m_widget->add(pic);
+template <typename WidgetType, typename ReturnType>
+ReturnType& Widget<WidgetType, ReturnType>::add_to(Panel& panel) {
+    panel->add(m_widget);
+    return static_cast<ReturnType&>(*this);
 }
-
-Panel& Panel::background(const sf::Color& color) { m_widget->getRenderer()->setBackgroundColor(color); }
 
 CheckBox& CheckBox::small() { return size(10, 10).text_size(18); }
 

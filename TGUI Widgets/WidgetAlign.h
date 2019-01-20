@@ -4,6 +4,7 @@
 #include <TGUI/TGUI.hpp>
 #include <type_traits>
 #include "../helpers/MyTypeTraits.hpp"
+#include "TguiWidgets.hpp"
 
 namespace os {
 
@@ -12,7 +13,7 @@ struct Property {};
 template <int WIDTH, int HEIGHT>
 struct Size : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.size(WIDTH, HEIGHT), ...);
     }
 };
@@ -20,7 +21,7 @@ struct Size : Property {
 template <int WIDTH>
 struct Width : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.width(WIDTH), ...);
     }
 };
@@ -28,28 +29,28 @@ struct Width : Property {
 template <int HEIGHT>
 struct Height : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.height(HEIGHT), ...);
     }
 };
 
 struct Center : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.pos(w->getPosition().x - w->getSize().x / 2, w->getPosition().y), ...);
     }
 };
 
 struct Left : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.pos(w->getPosition().x - w->getSize().x, w->getPosition().y), ...);
     }
 };
 
 struct Hide : Property {
     template <typename... W>
-    static void operator()(W&&... w) {
+    static void apply(W&&... w) {
         (w.hide(), ...);
     }
 };
@@ -62,11 +63,15 @@ constexpr bool has_set_text_size_v = os::detect_v<has_set_text_size, T>;
 
 template <int SIZE>
 struct TextSize : Property {
-    template <typename... W>
-    static void operator()(W&&... w) {
+    template <class W>
+    static void apply_impl(W&& w) {
         if constexpr (has_set_text_size_v<W>) {
-            (w.text_size(SIZE), ...);
+            w.text_size(SIZE);
         }
+    }
+    template <typename... W>
+    static void apply(W&&... w) {
+        (apply_impl(w), ...);
     }
 };
 
@@ -99,7 +104,7 @@ template <typename... P>
 struct ApplyProperty {
     template <typename W>
     static void apply(W& w) {
-        (P::(w), ...);
+        (P::apply(w), ...);
     }
 };
 
@@ -109,7 +114,7 @@ struct Align {
 
     Align(const Align& b) : base(b.base), x(b.x), y(b.y), gap(b.gap), step(b.step), down(b.down) {}
 
-    template <typename W, is_widget_t<W> = 0>
+    /*template <typename W, is_widget_t<W> = 0>
     Align(W& w, int gap = 0, bool down = true) {
         base = static_cast<tgui::Panel*>(w->getParent());
         if (down) {
@@ -119,7 +124,7 @@ struct Align {
             x = w->getPosition().x + w->getSize().x + gap;
             y = w->getPosition().y;
         }
-    }
+    }*/
 
     Align operator<<(Vertical d) {
         down = true;
@@ -152,7 +157,7 @@ struct Align {
 
     template <typename W>
     Align<T..., W> operator<<(const W& w) {
-        if constexpr (std::is_base_of_v<Property, P>) {
+        if constexpr (std::is_base_of_v<Property, W>) {
             return Align<T..., W>(*this);
         } else {
             w.pos(x, y);
@@ -181,7 +186,7 @@ struct Align {
         ApplyProperty<T...>::apply(widget);
     }
 
-    os::Panel* base;
+    tgui::Panel* base;
     int x, y, gap, step;
     bool down;
 };

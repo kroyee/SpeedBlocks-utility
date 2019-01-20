@@ -8,6 +8,9 @@ namespace os {
 
 inline tgui::Theme defaultTheme;
 
+template <typename PanelT>
+class PanelType;
+
 template <typename WidgetType, typename ReturnType>
 class Widget {
    public:
@@ -32,12 +35,12 @@ class Widget {
     ReturnType& height(float h) { return size(m_widget->getSize().x, h); }
 
     ReturnType& show() {
-        m_widget->setVisible(false);
+        m_widget->setVisible(true);
         return static_cast<ReturnType&>(*this);
     }
 
     ReturnType& hide() {
-        m_widget->setVisible(true);
+        m_widget->setVisible(false);
         return static_cast<ReturnType&>(*this);
     }
 
@@ -51,10 +54,10 @@ class Widget {
         return static_cast<ReturnType&>(*this);
     }
 
-    ReturnType& add_to(Panel panel) {
-        panel->add(m_widget);
-        return static_cast<ReturnType&>(*this);
-    }
+    ReturnType& add_to(PanelType<tgui::Panel>& panel); /* {
+         panel->add(m_widget);
+         return static_cast<ReturnType&>(*this);
+     }*/
 
     ReturnType& del() { m_widget->getParent()->remove(m_widget); }
 
@@ -82,9 +85,9 @@ class TextWidget : public Widget<WidgetType, ReturnType> {
     }
 
     ReturnType& center() {
-        if constexpr (std::is_same_v < WidgetType, tgui::Label)
+        if constexpr (std::is_same_v<WidgetType, tgui::Label>)
             this->m_widget->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
-        else if constexpr (std::is_same_v < WidgetType, tgui::EditBox)
+        else if constexpr (std::is_same_v<WidgetType, tgui::EditBox>)
             this->m_widget->setAlignment(tgui::EditBox::Alignment::Center);
 
         return static_cast<ReturnType&>(*this);
@@ -136,10 +139,16 @@ class TitledWidget<WidgetBase<WidgetType, ReturnType>> : public WidgetBase<Widge
         return static_cast<ReturnType&>(*this);
     }
 
-    ReturnType& add(tgui::Panel::Ptr panel) {
+    ReturnType& add_to(tgui::Panel::Ptr panel) {
         panel->add(m_title.get());
         panel->add(this->m_widget);
         return static_cast<ReturnType&>(*this);
+    }
+
+    ReturnType& del() {
+        auto parent = this->m_widget->getParent();
+        parent->remove(this->m_widget);
+        parent->remove(m_title.get());
     }
 
     ReturnType& bind() {}
@@ -167,6 +176,7 @@ class Button : public TextWidget<tgui::Button, Button> {
     template <typename... T>
     Button& connect(T&&... t) {
         m_widget->connect(std::forward<T>(t)...);
+        return *this;
     }
 };
 
@@ -208,17 +218,29 @@ class Slider : public TitledWidget<TextWidget<tgui::Slider, Slider>> {
     Slider& step(float value);
 };
 
-class Panel : public Widget<tgui::Panel, Panel> {
+tgui::Texture get_panel_background();
+
+template <typename PanelT>
+class PanelType : public Widget<PanelT, PanelType<PanelT>> {
    public:
     template <typename... WType>
-    Panel& add(WType&&... widget) {
-        (std::forward<WType>(widget).add(m_widget), ...);
+    PanelType& add(WType&&... widget) {
+        (std::forward<WType>(widget).add_to(this->m_widget), ...);
         return *this;
     }
 
-    Panel& background();
+    PanelType& background() {
+        static auto background = get_panel_background();
+        tgui::Picture::Ptr pic = tgui::Picture::create(background);
+        pic->setSize(tgui::bindSize(this->m_widget));
+        this->m_widget->add(pic);
+        return *this;
+    }
 
-    Panel& background(const sf::Color& color);
+    PanelType& background(const sf::Color& color) {
+        this->m_widget->getRenderer()->setBackgroundColor(color);
+        return *this;
+    }
 
     Align<> align(int x, int y, int gap = 0, bool down = true) { return Align<>(*this, x, y, gap, down); }
 
@@ -237,6 +259,9 @@ class Panel : public Widget<tgui::Panel, Panel> {
         return (Align<>{w, 0, false} << Vertical{0});
     }
 };
+
+using Panel = PanelType<tgui::Panel>;
+using ScrollPanel = PanelType<tgui::ScrollablePanel>;
 
 }  // namespace os
 

@@ -86,6 +86,10 @@ Panel {
     BackgroundColor = rgba(255, 255, 255, 0);
 }
 
+HighlightPanel {
+    BackgroundColor = rgba(80, 80, 80, 100);
+}
+
 ProgressBar {
     BackImage = "neutralUIsheet.png" Part(0, 180, 120, 60) Middle(30, 0, 60, 60);
     FrontImage = "neutralUIsheet.png" Part(120, 0, 120, 60) Middle(30, 0, 60, 60);
