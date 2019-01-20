@@ -53,7 +53,7 @@ class Parser:
         self.keywords = [ "class", "template", "namespace", "struct" ]
     
     def open(self, f):
-        self.input = open(f).read()
+        self.input = open(f).read().split()
         self.pos = 0
     
     def match(self, txt):
