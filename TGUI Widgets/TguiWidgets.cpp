@@ -8,6 +8,59 @@ Button& Button::medium() { return size(150, 40).text_size(24); }
 
 Button& Button::large() { return size(200, 50).text_size(32); }
 
+LabeledButton::LabeledButton() {
+    button->setRenderer(defaultTheme.getRenderer("BigButton"));
+    m_widget->add(top_left.get());
+    m_widget->add(top_right.get());
+    m_widget->add(bottom_left.get());
+    m_widget->add(bottom_right.get());
+    m_widget->add(button.get());
+
+    top_left->setPosition(bindLeft(button.get()) + 5, bindTop(button.get()) + 5);
+    top_right->setPosition(bindRight(button.get()) - bindWidth(top_right.get()) - 5, bindTop(button.get()) + 5);
+    bottom_left->setPosition(bindLeft(button.get()) + 5, bindBottom(button.get()) - bindHeight(bottom_left.get()) - 5);
+    bottom_right->setPosition(bindRight(button.get()) - bindWidth(bottom_right.get()) - 5, bindBottom(button.get()) - bindHeight(bottom_right.get()) - 5);
+
+    top_left.disable();
+    top_right.disable();
+    bottom_left.disable();
+    bottom_right.disable();
+
+    button->setSize(bindSize(m_widget));
+}
+
+LabeledButton& LabeledButton::text(const std::string& text) {
+    button.text(text);
+    return *this;
+}
+
+LabeledButton& LabeledButton::text_size(int size) {
+    button.text_size(size);
+    return *this;
+}
+
+LabeledButton& LabeledButton::label_size(int size) {
+    top_left.text_size(size);
+    top_right.text_size(size);
+    bottom_left.text_size(size);
+    bottom_right.text_size(size);
+    return *this;
+}
+
+LabeledButton& LabeledButton::labels(const std::string& tl, const std::string& tr, const std::string& bl, const std::string& br) {
+    top_left.text(tl);
+    top_right.text(tr);
+    bottom_left.text(bl);
+    bottom_right.text(br);
+    return *this;
+}
+
+LabeledButton& LabeledButton::padding(float p) {
+    button->setPosition(p, p);
+    button->setSize(bindWidth(m_widget) - 2 * p, bindHeight(m_widget) - 2 * p);
+    return *this;
+}
+
 Label& Label::small() { return text_size(18); }
 
 Label& Label::medium() { return text_size(24); }

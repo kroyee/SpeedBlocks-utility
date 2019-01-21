@@ -8,8 +8,8 @@ namespace os {
 
 inline tgui::Theme defaultTheme;
 
-template <typename PanelT>
-class PanelType;
+template <class PanelT>
+struct Panel_impl;
 
 template <typename WidgetType, typename ReturnType>
 class Widget {
@@ -54,10 +54,7 @@ class Widget {
         return static_cast<ReturnType&>(*this);
     }
 
-    ReturnType& add_to(PanelType<tgui::Panel>& panel); /* {
-         panel->add(m_widget);
-         return static_cast<ReturnType&>(*this);
-     }*/
+    ReturnType& add_to(Panel_impl<tgui::Panel>& panel);
 
     ReturnType& del() { m_widget->getParent()->remove(m_widget); }
 
@@ -180,6 +177,22 @@ class Button : public TextWidget<tgui::Button, Button> {
     }
 };
 
+class LabeledButton : public Widget<tgui::Panel, LabeledButton> {
+   public:
+    LabeledButton();
+
+    LabeledButton& text(const std::string& text);
+    LabeledButton& text_size(int size);
+    LabeledButton& label_size(int size);
+    LabeledButton& labels(const std::string& tl, const std::string& tr, const std::string& bl, const std::string& br);
+    LabeledButton& padding(float p);
+
+    Label top_left, top_right, bottom_left, bottom_right;
+
+   private:
+    Button button;
+};
+
 class Edit : public TitledWidget<TextWidget<tgui::EditBox, Edit>> {
    public:
     Edit(const std::string& title = "");
@@ -220,26 +233,26 @@ class Slider : public TitledWidget<TextWidget<tgui::Slider, Slider>> {
 
 tgui::Texture get_panel_background();
 
-template <typename PanelT>
-class PanelType : public Widget<PanelT, PanelType<PanelT>> {
+template <typename PanelT, class ReturnType>
+class PanelType : public Widget<PanelT, ReturnType> {
    public:
     template <typename... WType>
-    PanelType& add(WType&&... widget) {
-        (std::forward<WType>(widget).add_to(this->m_widget), ...);
-        return *this;
+    ReturnType& add(WType&&... widget) {
+        (std::forward<WType>(widget).add_to(*this), ...);
+        return static_cast<ReturnType&>(*this);
     }
 
-    PanelType& background() {
+    ReturnType& background() {
         static auto background = get_panel_background();
         tgui::Picture::Ptr pic = tgui::Picture::create(background);
         pic->setSize(tgui::bindSize(this->m_widget));
         this->m_widget->add(pic);
-        return *this;
+        return static_cast<ReturnType&>(*this);
     }
 
-    PanelType& background(const sf::Color& color) {
+    ReturnType& background(const sf::Color& color) {
         this->m_widget->getRenderer()->setBackgroundColor(color);
-        return *this;
+        return static_cast<ReturnType&>(*this);
     }
 
     Align<> align(int x, int y, int gap = 0, bool down = true) { return Align<>(*this, x, y, gap, down); }
@@ -260,8 +273,11 @@ class PanelType : public Widget<PanelT, PanelType<PanelT>> {
     }
 };
 
-using Panel = PanelType<tgui::Panel>;
-using ScrollPanel = PanelType<tgui::ScrollablePanel>;
+template <class PanelT>
+struct Panel_impl : public PanelType<PanelT, Panel_impl<PanelT>> {};
+
+using Panel = Panel_impl<tgui::Panel>;
+using ScrollPanel = Panel_impl<tgui::ScrollablePanel>;
 
 }  // namespace os
 
