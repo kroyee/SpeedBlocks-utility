@@ -1,29 +1,22 @@
 #ifndef BUTTONGRID_HPP
 #define BUTTONGRID_HPP
 
+#include <algorithm>
 #include <vector>
-
 #include "TguiWidgets.hpp"
 
 namespace os {
 
 class ButtonGrid : public PanelType<tgui::ScrollablePanel, ButtonGrid> {
    public:
-    ButtonGrid();
-
-    template <class... Buttons>
-    ButtonGrid& add(Buttons... buttons) {
-        (wrap->add(buttons.get()), ...);
-        if (padding_size) {
-            //(buttons.padding(padding_size), ...);
-        }
-        return *this;
-    }
+    ButtonGrid& add(uint16_t id, LabeledButton button);
 
     LabeledButton& get_button(uint16_t id);
     ButtonGrid& del(uint16_t id);
 
     ButtonGrid& padding(float p);
+
+    ButtonGrid& update();
 
    private:
     struct ButtonID {
@@ -31,7 +24,6 @@ class ButtonGrid : public PanelType<tgui::ScrollablePanel, ButtonGrid> {
         LabeledButton button;
     };
     std::vector<ButtonID> button_ids;
-    tgui::HorizontalWrap::Ptr wrap;
     float padding_size = 0;
 };
 

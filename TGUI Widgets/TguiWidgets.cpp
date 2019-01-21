@@ -21,11 +21,6 @@ LabeledButton::LabeledButton() {
     bottom_left->setPosition(bindLeft(button.get()) + 5, bindBottom(button.get()) - bindHeight(bottom_left.get()) - 5);
     bottom_right->setPosition(bindRight(button.get()) - bindWidth(bottom_right.get()) - 5, bindBottom(button.get()) - bindHeight(bottom_right.get()) - 5);
 
-    top_left.disable();
-    top_right.disable();
-    bottom_left.disable();
-    bottom_right.disable();
-
     button->setSize(bindSize(m_widget));
 }
 
