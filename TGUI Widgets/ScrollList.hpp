@@ -37,6 +37,8 @@ class ScrollList : public ScrollPanel {
    public:
     ScrollList();
 
+    ScrollList& set_positions(std::vector<int> pos) { positions = std::move(pos); }
+
     template <class... Pos>
     ScrollList& set_positions(Pos... pos) {
         positions = {pos...};
@@ -48,32 +50,24 @@ class ScrollList : public ScrollPanel {
         return *this;
     }
 
+    ScrollList& add(uint16_t id, std::vector<tgui::Widget::Ptr> w);
+
     template <class... Widgets>
     ScrollList& add(uint16_t id, Widgets&&... widgets) {
         std::vector<tgui::Widget::Ptr> w{widgets.get()...};
-        for (std::size_t i = 0, end = std::min(w.size(), positions.size()); i < end; ++i) {
-            w[i]->setPosition(positions[i], 0);
-            m_widget->add(w[i]);
-        }
-        for (auto& wid : w)
-            if (wid->getSize().y + 10 > height) height = wid->getSize().y + 10;
-
-        if (!std::any_of(rows.begin(), rows.end(), [&](Row& row) {
-                if (row.id == id) {
-                    row.del();
-                    row = Row(id, std::move(w));
-                    return true;
-                }
-                return false;
-            })) {
-            rows.emplace_back(id, std::move(w));
-        }
-
-        update_positions();
-        return *this;
+        add(id, std::move(w));
     }
 
     ScrollList& del(uint16_t id);
+
+    std::size_t size() { return rows.size(); }
+
+    ScrollList& pop_back() {
+        if (!rows.empty()) {
+            rows.back().del();
+            rows.pop_back();
+        }
+    }
 };
 
 }  // namespace os
