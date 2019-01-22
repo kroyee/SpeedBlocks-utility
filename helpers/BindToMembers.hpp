@@ -17,7 +17,7 @@ using is_braces_constructible = decltype(test_is_braces_constructible<T, TArgs..
 template <class FuncObj, class T>
 decltype(auto) bind_to_members(FuncObj&& Func, T&& object) noexcept {
     using type = std::decay_t<T>;
-    using at = detail::any_type;
+    using at = any_type;
     using detail::is_braces_constructible;
     if constexpr (is_braces_constructible<type, at, at, at, at, at, at, at, at, at, at, at, at, at, at, at, at, at, at, at>{}) {
         auto&& [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18] = object;

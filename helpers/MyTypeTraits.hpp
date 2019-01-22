@@ -1,6 +1,10 @@
+#ifndef MYTYPETRAITS_HPP
+#define MYTYPETRAITS_HPP
+
 namespace os {
 
 namespace detail {
+
 template <template <class...> class CheckTemplate, class = void, class... Object>
 struct detect_impl : std::false_type {};
 
@@ -17,3 +21,5 @@ struct any_type {
 };
 
 }  // namespace os
+
+#endif  // MYTYPETRAITS_HPP
