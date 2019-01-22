@@ -22,6 +22,29 @@ ScrollList::ScrollList() {
     });
 }
 
+ScrollList& ScrollList::add(uint16_t id, std::vector<tgui::Widget::Ptr> w) {
+    for (std::size_t i = 0, end = std::min(w.size(), positions.size()); i < end; ++i) {
+        w[i]->setPosition(positions[i], 0);
+        m_widget->add(w[i]);
+    }
+    for (auto& wid : w)
+        if (wid->getSize().y + 10 > height) height = wid->getSize().y + 10;
+
+    if (!std::any_of(rows.begin(), rows.end(), [&](Row& row) {
+            if (row.id == id) {
+                row.del();
+                row = Row(id, std::move(w));
+                return true;
+            }
+            return false;
+        })) {
+        rows.emplace_back(id, std::move(w));
+    }
+
+    update_positions();
+    return *this;
+}
+
 void ScrollList::update_positions() {
     auto pos = height / 2;
     for (auto& row : rows) {
