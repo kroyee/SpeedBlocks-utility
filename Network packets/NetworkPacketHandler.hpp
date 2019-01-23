@@ -4,15 +4,7 @@
 #include <functional>
 #include <type_traits>
 #include <vector>
-
-#define PACKET(TYPE, N)                                                  \
-    struct TYPE;                                                         \
-    template <>                                                          \
-    struct os::PacketID<N> {                                             \
-        using type = TYPE;                                               \
-        inline static std::vector<std::function<void(type&)>> callbacks; \
-    };                                                                   \
-    struct TYPE
+#include "PacketMacro.hpp"
 
 namespace os {
 
@@ -34,8 +26,8 @@ constexpr int get_packet_id() {
 }
 
 template <class T, class Func>
-void handle_packet(Func f) {
-    PacketID<get_packet_id<T>()>::callbacks.emplace_back(f);
+auto handle_packet(Func f) {
+    return PacketID<get_packet_id<T>()>::callbacks.add_callback(std::move(f));
 }
 
 template <typename PacketClass>
@@ -66,10 +58,7 @@ class PacketManager {
             packet_array_stream_right[N] = [](PacketClass& packet) {
                 typename PacketID<N>::type val;
                 packet >> val;
-                for (auto& callback : PacketID<N>::callbacks) {
-                    // if (callback.first) callback.second(val);
-                    callback(val);
-                }
+                PacketID<N>::callbacks.trigger_callbacks(val);
             };
         }
         if constexpr (N != 0) get_registered_functions<N - 1>();
