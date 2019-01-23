@@ -33,9 +33,6 @@ constexpr bool is_container_v = (os::detect_v<is_container, T> && !std::is_same_
 
 template <class Stream>
 struct To {
-    To(Stream& stream) : m_stream(stream) {}
-    To(Stream&& stream) : m_stream(stream) {}
-
     template <class Object>
     To& operator<<(Object&& object) {
         if constexpr (is_container_v<Object>) {
@@ -72,9 +69,12 @@ struct To {
         return *this;
     }
 
+    operator bool() { return m_stream; }
+
    private:
-    Stream& m_stream;
+    Stream m_stream;
 };
+
 }  // namespace Stream
 
 #endif
