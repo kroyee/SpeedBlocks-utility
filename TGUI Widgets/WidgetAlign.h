@@ -4,7 +4,6 @@
 #include <TGUI/TGUI.hpp>
 #include <type_traits>
 #include "../helpers/MyTypeTraits.hpp"
-#include "TguiWidgets.hpp"
 
 namespace os {
 
@@ -106,89 +105,97 @@ struct ApplyProperty {
     static void apply(W& w) {
         (P::apply(w), ...);
     }
+
+    template <typename... W>
+    static void apply(W&... w) {
+        (apply(w), ...);
+    }
 };
 
-template <typename... T>
-struct Align {
-    Align(tgui::Panel::Ptr& base, int x, int y, int gap = 0, bool down = true) : base(base.get()), x(x), y(y), gap(gap), step(0), down(down) {}
+template <class BaseType>
+struct AlignBase {
+    template <typename... T>
+    struct Align {
+        Align(BaseType& base, int x, int y, int gap = 0, bool down = true) : base(base), x(x), y(y), gap(gap), step(0), down(down) {}
 
-    Align(const Align& b) : base(b.base), x(b.x), y(b.y), gap(b.gap), step(b.step), down(b.down) {}
+        Align(const Align& b) : base(b.base), x(b.x), y(b.y), gap(b.gap), step(b.step), down(b.down) {}
 
-    /*template <typename W, is_widget_t<W> = 0>
-    Align(W& w, int gap = 0, bool down = true) {
-        base = static_cast<tgui::Panel*>(w->getParent());
-        if (down) {
-            x = w->getPosition().x;
-            y = w->getPosition().y + w->getSize().y + gap;
-        } else {
-            x = w->getPosition().x + w->getSize().x + gap;
-            y = w->getPosition().y;
-        }
-    }*/
-
-    Align operator<<(Vertical d) {
-        down = true;
-        step = d.size;
-        return *this;
-    }
-    Align operator<<(Horizontal r) {
-        down = false;
-        step = r.size;
-        return *this;
-    }
-    Align operator<<(Gap g) {
-        gap = g.size;
-        return *this;
-    }
-    Align operator<<(Move s) {
-        y += s.y;
-        x += s.x;
-        return *this;
-    }
-    Align operator<<(Pos p) {
-        x = p.x;
-        y = p.y;
-        if (down && p.h)
-            y += p.h + gap;
-        else if (p.w)
-            x += p.w + gap;
-        return *this;
-    }
-
-    template <typename W>
-    Align<T..., W> operator<<(const W& w) {
-        if constexpr (std::is_base_of_v<Property, W>) {
-            return Align<T..., W>(*this);
-        } else {
-            w.pos(x, y);
-            apply(w);
-            base->add(w);
-
+        /*template <typename W, is_widget_t<W> = 0>
+        Align(W& w, int gap = 0, bool down = true) {
+            base = static_cast<tgui::Panel*>(w->getParent());
             if (down) {
-                if (step)
-                    y += step;
-                else
-                    y += w->getSize().y + gap;
+                x = w->getPosition().x;
+                y = w->getPosition().y + w->getSize().y + gap;
             } else {
-                if (step)
-                    x += step;
-                else
-                    x += w->getSize().x + gap;
+                x = w->getPosition().x + w->getSize().x + gap;
+                y = w->getPosition().y;
             }
+        }*/
 
+        Align operator<<(Vertical d) {
+            down = true;
+            step = d.size;
             return *this;
         }
-    }
+        Align operator<<(Horizontal r) {
+            down = false;
+            step = r.size;
+            return *this;
+        }
+        Align operator<<(Gap g) {
+            gap = g.size;
+            return *this;
+        }
+        Align operator<<(Move s) {
+            y += s.y;
+            x += s.x;
+            return *this;
+        }
+        Align operator<<(Pos p) {
+            x = p.x;
+            y = p.y;
+            if (down && p.h)
+                y += p.h + gap;
+            else if (p.w)
+                x += p.w + gap;
+            return *this;
+        }
 
-   private:
-    template <typename W>
-    void apply(W& widget) {
-        ApplyProperty<T...>::apply(widget);
-    }
+        template <typename W>
+        auto operator<<(W& w) {
+            if constexpr (std::is_base_of_v<Property, W>) {
+                return Align<T..., W>(*this);
+            } else {
+                w.pos(x, y);
+                apply(w);
+                base.add(w);
 
-    tgui::Panel* base;
-    int x, y, gap, step;
-    bool down;
+                if (down) {
+                    if (step)
+                        y += step;
+                    else
+                        y += w->getSize().y + gap;
+                } else {
+                    if (step)
+                        x += step;
+                    else
+                        x += w->getSize().x + gap;
+                }
+
+                return *this;
+            }
+        }
+
+       private:
+        template <typename W>
+        void apply(W& widget) {
+            ApplyProperty<T...>::apply(widget);
+        }
+
+        BaseType& base;
+        int x, y, gap, step;
+        bool down;
+    };
 };
 
 }  // namespace os

@@ -17,17 +17,20 @@ class ScrollList : public ScrollPanel {
             for (auto& w : widgets) w->getParent()->remove(w);
         }
 
-        uint16_t id;
-        bool selected = false;
         void pos(float y) {
             for (auto& w : widgets) w->setPosition(w->getPosition().x, y - w->getSize().y / 2.f);
         }
 
-       private:
+        uint16_t id;
+        bool selected = false;
+        bool updated = true;
         std::vector<tgui::Widget::Ptr> widgets;
     };
 
     void update_positions();
+    void select_row(int val);
+    void select_row();
+    void remove_none_updated();
 
     std::vector<Row> rows;
     std::vector<int> positions;
@@ -37,7 +40,10 @@ class ScrollList : public ScrollPanel {
    public:
     ScrollList();
 
-    ScrollList& set_positions(std::vector<int> pos) { positions = std::move(pos); }
+    ScrollList& set_positions(std::vector<int> pos) {
+        positions = std::move(pos);
+        return *this;
+    }
 
     template <class... Pos>
     ScrollList& set_positions(Pos... pos) {
@@ -56,6 +62,7 @@ class ScrollList : public ScrollPanel {
     ScrollList& add(uint16_t id, Widgets&&... widgets) {
         std::vector<tgui::Widget::Ptr> w{widgets.get()...};
         add(id, std::move(w));
+        return *this;
     }
 
     ScrollList& del(uint16_t id);
@@ -67,7 +74,17 @@ class ScrollList : public ScrollPanel {
             rows.back().del();
             rows.pop_back();
         }
+        return *this;
     }
+
+    template <class F>
+    ScrollList& sort(F f) {
+        std::sort(rows.begin(), rows.end(), [&](Row& lhs, Row& rhs) { return f(lhs.widgets, rhs.widgets); });
+        return *this;
+    }
+
+    ScrollList& pre_update();
+    ScrollList& post_update();
 };
 
 }  // namespace os

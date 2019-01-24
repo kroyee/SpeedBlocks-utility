@@ -14,11 +14,7 @@ ScrollList::ScrollList() {
             ++row_num;
             pos.y -= height;
         }
-
-        rows[row_num].selected = true;
-
-        select_highlight.pos(0, row_num * height).size(m_widget->getSize().x - m_widget->getScrollbarWidth(), height).show();
-        select_highlight.show();
+        select_row(row_num);
     });
 }
 
@@ -63,6 +59,39 @@ ScrollList& ScrollList::del(uint16_t id) {
     }
 
     update_positions();
+    return *this;
+}
+
+void ScrollList::select_row(int row_num) {
+    rows[row_num].selected = true;
+
+    select_highlight.pos(0, row_num * height).size(m_widget->getSize().x - m_widget->getScrollbarWidth(), height).show();
+    select_highlight.show();
+}
+
+void ScrollList::select_row() {
+    select_highlight.hide();
+    for (unsigned i = 0; i < rows.size(); ++i)
+        if (rows[i].selected) select_row(i);
+}
+
+void ScrollList::remove_none_updated() {
+    for (auto it = rows.begin(), end = rows.end(); it != end;) {
+        if (it->updated)
+            it = rows.erase(it);
+        else
+            ++it;
+    }
+}
+
+ScrollList& ScrollList::pre_update() {
+    for (auto& row : rows) row.updated = false;
+    return *this;
+}
+
+ScrollList& ScrollList::post_update() {
+    remove_none_updated();
+    select_row();
     return *this;
 }
 

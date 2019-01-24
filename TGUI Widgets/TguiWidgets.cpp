@@ -62,6 +62,11 @@ Label& Label::medium() { return text_size(24); }
 
 Label& Label::large() { return text_size(32); }
 
+Label& Label::max(int val) {
+    m_widget->setMaximumTextWidth(val);
+    return *this;
+}
+
 Edit::Edit(const std::string& title_) {
     title(title_);
     center();
@@ -98,23 +103,18 @@ tgui::Texture get_panel_background() {
     return button->getRenderer()->getTexture();
 }
 
-template <typename WidgetType, typename ReturnType>
-ReturnType& Widget<WidgetType, ReturnType>::add_to(Panel& panel) {
-    panel->add(m_widget);
-    return static_cast<ReturnType&>(*this);
-}
-
 CheckBox& CheckBox::small() { return size(10, 10).text_size(18); }
-
 CheckBox& CheckBox::medium() { return size(20, 20).text_size(24); }
-
 CheckBox& CheckBox::large() { return size(30, 30).text_size(32); }
 
 RadioButton& RadioButton::small() { return size(10, 10).text_size(18); }
-
 RadioButton& RadioButton::medium() { return size(20, 20).text_size(24); }
-
 RadioButton& RadioButton::large() { return size(30, 30).text_size(32); }
+
+ChatBox& ChatBox::text_size(int size) {
+    m_widget->setTextSize(size);
+    return *this;
+}
 
 Slider& Slider::min(float value) {
     m_widget->setMinimum(value);
@@ -128,6 +128,54 @@ Slider& Slider::max(float value) {
 
 Slider& Slider::step(float value) {
     m_widget->setStep(value);
+    return *this;
+}
+
+Slider& Slider::set(float value) {
+    m_widget->setValue(value);
+    return *this;
+}
+
+ProgressBar& ProgressBar::min(unsigned val) {
+    m_widget->setMinimum(val);
+    return *this;
+}
+ProgressBar& ProgressBar::max(unsigned val) {
+    m_widget->setMaximum(val);
+    return *this;
+}
+ProgressBar& ProgressBar::set(unsigned val) {
+    m_widget->setValue(val);
+    return *this;
+}
+
+Tabs& Tabs::add(std::string str) {
+    m_widget->add(str);
+    return *this;
+}
+
+Tabs& Tabs::select(int val) {
+    m_widget->select(val);
+    return *this;
+}
+
+Tabs& Tabs::tab_height(float val) {
+    m_widget->setTabHeight(val);
+    return *this;
+}
+
+ListBox& ListBox::add(std::string str) {
+    m_widget->addItem(str);
+    return *this;
+}
+
+ListBox& ListBox::remove(std::string str) {
+    m_widget->removeItem(str);
+    return *this;
+}
+
+ListBox& ListBox::clear() {
+    m_widget->removeAllItems();
     return *this;
 }
 
