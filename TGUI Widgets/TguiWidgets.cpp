@@ -97,12 +97,6 @@ Edit& Edit::pass() {
     return *this;
 }
 
-tgui::Texture get_panel_background() {
-    tgui::Button::Ptr button;
-    button->setRenderer(defaultTheme.getRenderer("PanelBackground"));
-    return button->getRenderer()->getTexture();
-}
-
 CheckBox& CheckBox::small() { return size(10, 10).text_size(18); }
 CheckBox& CheckBox::medium() { return size(20, 20).text_size(24); }
 CheckBox& CheckBox::large() { return size(30, 30).text_size(32); }

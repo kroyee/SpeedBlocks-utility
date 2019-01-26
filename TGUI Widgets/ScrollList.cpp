@@ -5,7 +5,9 @@
 namespace os {
 
 ScrollList::ScrollList() {
+#ifndef __APPLE__
     m_widget->setHorizontalScrollbarPolicy(tgui::Scrollbar::Policy::Never);
+#endif
     m_widget->add(select_highlight.hide().get());
     select_highlight->setRenderer(defaultTheme.getRenderer("HighlightPanel"));
     m_widget->connect("MousePressed", [&](tgui::Vector2f pos) {

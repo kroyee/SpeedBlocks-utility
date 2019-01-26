@@ -152,7 +152,14 @@ class TextWidget : public Widget<WidgetType, ReturnType_> {
     }
 };
 
-tgui::Texture get_panel_background();
+class Picture : public Widget<tgui::Picture, Picture> {
+   public:
+    template <typename T>
+    Picture(T&& t) : Widget<tgui::Picture, Picture>(std::forward<T>(t)) {}
+    Picture() : Widget<tgui::Picture, Picture>(default_texture) {}
+
+    inline static tgui::Texture default_texture;
+};
 
 template <typename PanelT, class ReturnType_>
 class PanelType : public Widget<PanelT, ReturnType_> {
@@ -166,10 +173,9 @@ class PanelType : public Widget<PanelT, ReturnType_> {
     }
 
     ReturnType& background() {
-        static auto background = get_panel_background();
-        tgui::Picture::Ptr pic = tgui::Picture::create(background);
+        Picture pic;
         pic->setSize(tgui::bindSize(this->m_widget));
-        this->m_widget->add(pic);
+        this->m_widget->add(pic.get());
         return *this;
     }
 
@@ -387,12 +393,6 @@ class ProgressBar : public TitledWidget<Widget<tgui::ProgressBar, ProgressBar>> 
     ProgressBar& min(unsigned val);
     ProgressBar& max(unsigned val);
     ProgressBar& set(unsigned val);
-};
-
-class Picture : public Widget<tgui::Picture, Picture> {
-   public:
-    template <typename T>
-    Picture(T&& t) : Widget<tgui::Picture, Picture>(std::forward<T>(t)) {}
 };
 
 class Tabs : public Widget<tgui::Tabs, Tabs> {
