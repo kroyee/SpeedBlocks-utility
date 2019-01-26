@@ -97,6 +97,11 @@ Edit& Edit::pass() {
     return *this;
 }
 
+<<<<<<< HEAD
+=======
+tgui::Texture get_panel_background() { return tgui::ButtonRenderer(defaultTheme.getRenderer("PanelBackground")).getTexture(); }
+
+>>>>>>> 02040ea190e2cb680fa14937dfdac0120567bdfc
 CheckBox& CheckBox::small() { return size(10, 10).text_size(18); }
 CheckBox& CheckBox::medium() { return size(20, 20).text_size(24); }
 CheckBox& CheckBox::large() { return size(30, 30).text_size(32); }
