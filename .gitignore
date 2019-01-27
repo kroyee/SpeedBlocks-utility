@@ -12,3 +12,4 @@
 **/main.cpp
 **/*.exe
 */**/CMakeLists.txt
+**/a.out
