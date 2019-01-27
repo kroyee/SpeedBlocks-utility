@@ -34,4 +34,10 @@ PACKET(Foo3, 3) {
     }
 };
 
+PACKET(Foo4, 4){static void print(){std::cout << "Foo4 is empty"
+                                              << "\n";
+}
+}
+;
+
 #endif  // NETWORKPACKETS_HPP

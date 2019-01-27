@@ -27,7 +27,7 @@ constexpr int get_packet_id() {
 
 template <class T, class Func>
 auto handle_packet(Func f) {
-    return PacketID<get_packet_id<T>()>::callbacks.add_callback(std::move(f));
+    return Event<typename PacketID<get_packet_id<T>()>::type>::add(std::move(f));
 }
 
 template <typename PacketClass>
@@ -44,7 +44,17 @@ class PacketManager {
 
     template <typename Packet>
     static void write(Packet&& data) {
-        m_packet << get_packet_id<Packet>() << std::forward<Packet>(data);
+        if constexpr (std::is_empty_v<Packet>) {
+            m_packet << get_packet_id<Packet>();
+        } else {
+            m_packet << get_packet_id<Packet>() << std::forward<Packet>(data);
+        }
+    }
+
+    template <typename Packet>
+    static void write() {
+        static_assert(std::is_empty_v<Packet>, "write called without data on non-empty Packet type");
+        m_packet << get_packet_id<Packet>();
     }
 
     static PacketClass& get_packet() { return m_packet; }
@@ -55,11 +65,15 @@ class PacketManager {
     template <int N>
     static void get_registered_functions() {
         if constexpr (!std::is_same_v<typename PacketID<N>::type, void>) {
-            packet_array_stream_right[N] = [](PacketClass& packet) {
-                typename PacketID<N>::type val;
-                packet >> val;
-                PacketID<N>::callbacks.trigger_callbacks(val);
-            };
+            if constexpr (std::is_empty_v<typename PacketID<N>::type>) {
+                packet_array_stream_right[N] = [](PacketClass&) { Event<typename PacketID<N>::type>::trigger(); };
+            } else {
+                packet_array_stream_right[N] = [](PacketClass& packet) {
+                    typename PacketID<N>::type val;
+                    packet >> val;
+                    Event<typename PacketID<N>::type>::trigger(val);
+                };
+            }
         }
         if constexpr (N != 0) get_registered_functions<N - 1>();
     }
