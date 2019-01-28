@@ -5,12 +5,12 @@
 
 // inline static CallbackCollection<type> callbacks;
 
-#define PACKET(TYPE, N)      \
-    struct TYPE;             \
-    template <>              \
-    struct os::PacketID<N> { \
-        using type = TYPE;   \
-    };                       \
+#define PACKET(TYPE)                         \
+    struct TYPE;                             \
+    template <>                              \
+    struct os::PacketID<__COUNT##ER__ + 1> { \
+        using type = TYPE;                   \
+    };                                       \
     struct TYPE
 
 #endif  // PACKETMACRO_HPP
