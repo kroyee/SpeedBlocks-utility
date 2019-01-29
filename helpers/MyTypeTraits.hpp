@@ -20,6 +20,43 @@ struct any_type {
     constexpr operator T();
 };
 
+template <class... T>
+struct TypePack {};
+
+template <typename T>
+struct FunctionSignature {};
+
+template <typename P_ReturnType, typename P_Class, typename P_Arg>
+struct FunctionSignature<P_ReturnType (P_Class::*)(P_Arg)> {
+    using ReturnType = P_ReturnType;
+    using Class = P_Class;
+    using Arg = P_Arg;
+};
+
+template <typename P_ReturnType, typename P_Class, typename P_Arg>
+struct FunctionSignature<P_ReturnType (P_Class::*)(P_Arg) const> {
+    using ReturnType = P_ReturnType;
+    using Class = P_Class;
+    using Arg = P_Arg;
+};
+
+template <typename P_ReturnType, typename P_Class, typename... P_Args>
+struct FunctionSignature<P_ReturnType (P_Class::*)(P_Args...)> {
+    using ReturnType = P_ReturnType;
+    using Class = P_Class;
+    using Args = TypePack<P_Args...>;
+};
+
+template <typename P_ReturnType, typename P_Class, typename... P_Args>
+struct FunctionSignature<P_ReturnType (P_Class::*)(P_Args...) const> {
+    using ReturnType = P_ReturnType;
+    using Class = P_Class;
+    using Args = TypePack<P_Args...>;
+};
+
+template <class T>
+using LambdaSignature = FunctionSignature<decltype(T::operator())>;
+
 }  // namespace os
 
 #endif  // MYTYPETRAITS_HPP
