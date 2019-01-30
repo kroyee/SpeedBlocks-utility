@@ -1,3 +1,6 @@
+#ifndef BINDTOMEMBERS_HPP
+#define BINDTOMEMBERS_HPP
+
 #include <type_traits>
 #include "MyTypeTraits.hpp"
 
@@ -82,3 +85,5 @@ decltype(auto) bind_to_members(FuncObj&& Func, T&& object) noexcept {
 }
 
 }  // namespace os
+
+#endif

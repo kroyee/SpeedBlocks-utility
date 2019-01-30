@@ -2,6 +2,7 @@
 #define NETWORKPACKETHANDLER_HPP
 
 #include <functional>
+#include <string>
 #include <type_traits>
 #include <vector>
 #include "../Trigger/Trigger.hpp"
