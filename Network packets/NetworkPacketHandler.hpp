@@ -5,6 +5,7 @@
 #include <string>
 #include <type_traits>
 #include <vector>
+#include "../Serialize/Serialize.hpp"
 #include "../Trigger/Trigger.hpp"
 #include "../helpers/MyTypeTraits.hpp"
 #include "PacketMacro.hpp"
@@ -34,6 +35,15 @@ class PacketManager {
             m_packet << get_packet_id<Packet>();
         } else {
             m_packet << get_packet_id<Packet>() << std::forward<Packet>(data);
+        }
+    }
+
+    template <class AsType, class Data>
+    static void write_as(Data&& data) {
+        if constexpr (std::is_empty_v<AsType>) {
+            m_packet << get_packet_id<AsType>();
+        } else {
+            m_packet << get_packet_id<AsType>() << Stream::As<AsType>(data);
         }
     }
 
