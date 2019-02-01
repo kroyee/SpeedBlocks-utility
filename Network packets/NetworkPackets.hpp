@@ -3,6 +3,12 @@
 
 #include "NetworkPacketHandler.hpp"
 
+namespace sf {
+class Packet;
+}
+
+using PM = os::PacketManager<Stream::To<sf::Packet>>;
+
 // Client outgoing
 
 PACKET(NP_Replay){};
@@ -173,7 +179,7 @@ struct RoundScoreServer {
     uint16_t id;
     uint8_t ffa_rank;
     uint8_t position;
-    uint16_t score;
+    uint16_t game_score;
     float lines_adjusted;
     uint16_t ffa_points;
 };
@@ -291,9 +297,10 @@ PACKET(NP_AvgBpm) {
     uint16_t average_bpm;
 };
 
+PACKET(NP_TournamentTimeWo) { uint16_t time; };
+
 SIGNAL(NP_TournamentNotEnough);
 SIGNAL(NP_NotAsGuest);
-SIGNAL(NP_TournamentTimeWo);
 SIGNAL(NP_RoundEnd);
 SIGNAL(NP_YouWon);
 SIGNAL(NP_UdpConfirmed);
