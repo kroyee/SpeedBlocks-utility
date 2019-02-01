@@ -43,7 +43,8 @@ class PacketManager {
         if constexpr (std::is_empty_v<AsType>) {
             m_packet << get_packet_id<AsType>();
         } else {
-            m_packet << get_packet_id<AsType>() << Stream::As<AsType>(data);
+            m_packet << get_packet_id<AsType>();
+            m_packet.operator<<<Data, AsType>(data);
         }
     }
 
