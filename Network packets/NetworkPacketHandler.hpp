@@ -23,7 +23,7 @@ class PacketManager {
     static void init() { get_registered_functions(); }
 
     static void read(PacketClass& packet) {
-        int id;
+        uint8_t id;
         while (packet >> id) {
             packet_array_stream_right[id](packet);
         }
@@ -38,13 +38,22 @@ class PacketManager {
         }
     }
 
+    template <typename Packet>
+    static void write_udp(Packet&& data) {
+        if constexpr (std::is_empty_v<Packet>) {
+            m_udp_packet << get_packet_id<Packet>();
+        } else {
+            m_udp_packet << get_packet_id<Packet>() << std::forward<Packet>(data);
+        }
+    }
+
     template <class AsType, class Data>
     static void write_as(Data&& data) {
         if constexpr (std::is_empty_v<AsType>) {
             m_packet << get_packet_id<AsType>();
         } else {
             m_packet << get_packet_id<AsType>();
-            m_packet.operator<<<Data, AsType>(data);
+            m_packet.template operator<<<Data, AsType>(data);
         }
     }
 
@@ -57,7 +66,12 @@ class PacketManager {
     template <class Func>
     static auto handle_packet(Func f) {
         using T = std::decay_t<typename LambdaSignature<Func>::Arg>;
-        return Event<typename PacketID<get_packet_id<T>()>::type>::add(std::move(f));
+        return Event<T>::add(std::move(f));
+    }
+
+    template <class T, class Func>
+    static auto handle_packet(Func f) {
+        return Event<T>::add(std::move(f));
     }
 
     template <class T, int N = 255>
@@ -72,6 +86,7 @@ class PacketManager {
     }
 
     static PacketClass& get_packet() { return m_packet; }
+    static PacketClass& get_udp_packet() { return m_udp_packet; }
 
     static void clear() { m_packet = PacketClass{}; }
 
@@ -97,7 +112,7 @@ class PacketManager {
     }
 
     template <typename T, int N = 255>
-    static constexpr int get_packet_id() {
+    static constexpr uint8_t get_packet_id() {
         if constexpr (N == 0) {
             return 0;
         } else if constexpr (std::is_same_v<typename PacketID<N>::type, std::decay_t<T>>) {
@@ -109,7 +124,7 @@ class PacketManager {
 
     inline static std::array<std::function<void(PacketClass&)>, 256> packet_array_stream_right;
 
-    inline static PacketClass m_packet;
+    inline static PacketClass m_packet, m_udp_packet;
 };
 
 }  // namespace os

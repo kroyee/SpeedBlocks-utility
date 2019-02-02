@@ -107,6 +107,9 @@ struct Event<Data, std::enable_if_t<std::is_empty_v<Data>>> {
     inline static CallbackCollection<Data> callbacks;
 };
 
+template <class T>
+using Switch = typename CallbackCollection<T>::Switch;
+
 template <typename Data>
 class Trigger : public CallbackCollection<Data> {
    public:

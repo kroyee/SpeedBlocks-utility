@@ -11,7 +11,12 @@ using PM = os::PacketManager<Stream::To<sf::Packet>>;
 
 // Client outgoing
 
-PACKET(NP_Replay){};
+PACKET(NP_Replay) {
+    uint16_t type;
+    uint16_t id;
+    std::string name;
+    std::vector<uint8_t> data;
+};
 
 PACKET(NP_LoginRequest) {
     uint16_t clientVersion = 0;
@@ -27,7 +32,11 @@ struct RoundScore {
     uint16_t bpm;
 };
 
-PACKET(NP_GameOver) { RoundScore score; };
+PACKET(NP_GameOver) {
+    RoundScore score;
+    uint32_t duration;
+    uint16_t piece_count;
+};
 
 PACKET(NP_Winner) {
     RoundScore score;
@@ -52,11 +61,18 @@ PACKET(NP_CreateTournament) {
     uint8_t rounds = 0;
 };
 
-PACKET(NP_ConfirmUdp){};
+PACKET(NP_ConfirmUdp) { uint16_t id; };
 
-PACKET(NP_Gamestate){};
+PACKET(NP_Gamestate) {
+    uint16_t id;
+    uint8_t count;
+    std::vector<uint8_t> data;
+};
 
-PACKET(NP_Ping){};
+PACKET(NP_Ping) {
+    uint16_t client_id;
+    uint8_t ping_id;
+};
 
 PACKET(NP_JoinRoom) { uint16_t roomID = 0; };
 
@@ -125,11 +141,13 @@ struct ClientInfo {
 PACKET(NP_Welcome) {
     uint16_t yourID;
     std::string message;
-    std::vector<RoomInfo> rooms;
+};
+
+PACKET(NP_ClientList) { std::vector<ClientInfo> clients; };
+
+PACKET(NP_Matchmaking) {
     uint16_t matchmakingQueue;
     uint16_t matchmakingPlaying;
-    uint16_t clientCount;
-    std::vector<ClientInfo> clients;
 };
 
 PACKET(NP_ReplaySend){};
@@ -198,6 +216,10 @@ PACKET(NP_AuthResult) {
 PACKET(NP_Alert) { std::string text; };
 
 PACKET(NP_RoomList) { std::vector<RoomInfo> rooms; };
+
+PACKET(NP_RoomAdd) { RoomInfo room; };
+
+PACKET(NP_RoomRemove) { uint16_t id; };
 
 PACKET(NP_MatchMaking) {
     uint16_t queue;
@@ -269,6 +291,8 @@ PACKET(NP_CountdownStart) {
 };
 
 PACKET(NP_CountdownStop) { uint8_t status; };
+
+PACKET(NP_Countdown) { uint16_t countdown; };
 
 PACKET(NP_ClientLeftRoom) { uint16_t id; };
 
