@@ -57,7 +57,7 @@ void PacketCompress::getBits(uint8_t& byte, uint8_t bits) {
 }
 
 void PacketCompress::compress() {
-    clear();
+    m_data.clear();
     tmpcount = 0;
     bitcount = 0;
     uint8_t counter = 0;
