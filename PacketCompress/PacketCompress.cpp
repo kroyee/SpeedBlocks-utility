@@ -1,4 +1,4 @@
-#include "packetcompress.h"
+#include "PacketCompress.h"
 #include "GamePlay.h"
 #include "NetworkPackets.hpp"
 #include "Options.h"
