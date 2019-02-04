@@ -22,7 +22,7 @@ class PacketManager {
 
     static void init() { get_registered_functions(); }
 
-    static void read(PacketClass& packet) {
+    void read(PacketClass& packet) {
         uint8_t id;
         while (packet >> id) {
             packet_array_stream_right[id](packet);
@@ -30,7 +30,7 @@ class PacketManager {
     }
 
     template <typename Packet>
-    static void write(Packet&& data) {
+    void write(Packet&& data) {
         if constexpr (std::is_empty_v<Packet>) {
             m_packet << get_packet_id<Packet>();
         } else {
@@ -38,17 +38,8 @@ class PacketManager {
         }
     }
 
-    template <typename Packet>
-    static void write_udp(Packet&& data) {
-        if constexpr (std::is_empty_v<Packet>) {
-            m_udp_packet << get_packet_id<Packet>();
-        } else {
-            m_udp_packet << get_packet_id<Packet>() << std::forward<Packet>(data);
-        }
-    }
-
     template <class AsType, class Data>
-    static void write_as(Data&& data) {
+    void write_as(Data&& data) {
         if constexpr (std::is_empty_v<AsType>) {
             m_packet << get_packet_id<AsType>();
         } else {
@@ -58,7 +49,7 @@ class PacketManager {
     }
 
     template <typename Packet>
-    static void write() {
+    void write() {
         static_assert(std::is_empty_v<Packet>, "write called without data on non-empty Packet type");
         m_packet << get_packet_id<Packet>();
     }
@@ -85,10 +76,9 @@ class PacketManager {
         }
     }
 
-    static PacketClass& get_packet() { return m_packet; }
-    static PacketClass& get_udp_packet() { return m_udp_packet; }
+    PacketClass& get_packet() { return m_packet; }
 
-    static void clear() { m_packet = PacketClass{}; }
+    void clear() { m_packet = PacketClass{}; }
 
    private:
     template <int N = 255>
@@ -124,7 +114,7 @@ class PacketManager {
 
     inline static std::array<std::function<void(PacketClass&)>, 256> packet_array_stream_right;
 
-    inline static PacketClass m_packet, m_udp_packet;
+    PacketClass m_packet;
 };
 
 }  // namespace os

@@ -4,8 +4,6 @@
 #include "../helpers/BindToMembers.hpp"
 #include "../helpers/MyTypeTraits.hpp"
 
-#include <iostream>
-
 namespace Stream {
 
 template <class LHS, class RHS>
@@ -154,6 +152,8 @@ struct To {
     }
 
     operator Stream&() { return m_stream; }
+
+    Stream* operator->() { return &m_stream; }
 
     operator bool() { return m_stream; }
 

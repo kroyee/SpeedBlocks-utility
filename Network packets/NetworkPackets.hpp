@@ -106,14 +106,16 @@ PACKET(NP_ChallengeWatchReplay) {
     uint16_t replayID = 0;
 };
 
-PACKET(NP_SpectatorJoin) { uint16_t roomID = 0; };
-
-PACKET(NP_SpectatorLeave) { uint16_t roomID = 0; };
+PACKET(NP_SpectatorJoin) {
+    uint16_t tournamentID = 0;
+    uint16_t roomID = 0;
+};
 
 PACKET(NP_HandicapSet) {
     uint8_t handicap = 0;  // in %
 };
 
+SIGNAL(NP_SpectatorLeave);
 SIGNAL(NP_Leave);
 SIGNAL(NP_Away);
 SIGNAL(NP_NotAway);
@@ -187,6 +189,8 @@ PACKET(NP_ChallengeLeaderboard) {
     std::vector<ListEntryTitle> columns;
     std::vector<ChallengeScore> scores;
 };
+
+PACKET(NP_JoinChallenge) { uint16_t id; };
 
 PACKET(NP_ReplayRequest) { std::string message; };
 
