@@ -1,6 +1,6 @@
 #include "PacketCompress.h"
 #include "GamePlay.h"
-#include "NetworkPackets.hpp"
+#include "Packets.hpp"
 #include "Options.h"
 #include "Recording.h"
 

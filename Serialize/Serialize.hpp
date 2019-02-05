@@ -120,6 +120,8 @@ constexpr bool stream_compatible_v = detail::stream_compatible<Stream, std::deca
 
 template <class Stream>
 struct To {
+    using StreamType = Stream;
+
     template <class Object, class AsType = Object>
     To& operator<<(Object&& object) {
         static_assert(stream_compatible_v<Stream, Object, AsType>, "Stream::As with incompatible types");

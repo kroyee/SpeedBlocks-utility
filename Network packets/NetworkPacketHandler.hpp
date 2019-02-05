@@ -22,9 +22,9 @@ class PacketManager {
 
     static void init() { get_registered_functions(); }
 
-    void read(PacketClass& packet) {
+    void read() {
         uint8_t id;
-        while (packet >> id) {
+        while (m_packet >> id) {
             packet_array_stream_right[id](packet);
         }
     }
@@ -77,6 +77,8 @@ class PacketManager {
     }
 
     PacketClass& get_packet() { return m_packet; }
+    typename PacketClass::StreamType& get_base_packet() { return m_packet; }
+    operator typename PacketClass::StreamType&() { return m_packet; }
 
     void clear() { m_packet = PacketClass{}; }
 
