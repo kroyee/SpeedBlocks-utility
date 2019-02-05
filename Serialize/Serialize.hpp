@@ -103,9 +103,22 @@ struct ArgsTypeGetter {
     }
 };
 
+template <class T>
+struct add_outer_typepack {
+    using type = os::TypePack<T>;
+};
+
+template <class T>
+struct add_outer_typepack<os::TypePack<T>> {
+    using type = os::TypePack<T>;
+};
+
+template <class Stream, class T>
+using get_stream_types_t = typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type;
+
 template <class Stream, class LHS, class RHS, class = void>
 struct stream_compatible {
-    static constexpr bool value = std::is_same_v<decltype(StreamTypes<Stream>::template get<LHS>()), decltype(StreamTypes<Stream>::template get<RHS>())>;
+    static constexpr bool value = std::is_same_v<get_stream_types_t<Stream, LHS>, get_stream_types_t<Stream, RHS>>;
 };
 
 template <class Stream, class LHS, class RHS>
