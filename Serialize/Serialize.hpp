@@ -24,6 +24,12 @@ using is_container = decltype(std::declval<T>().begin(), std::declval<T>().end()
 template <class T>
 constexpr bool is_container_v = (os::detect_v<is_container, T> && !std::is_same_v<std::decay_t<T>, std::string>);
 
+template <class T>
+using is_pointer = decltype(*std::declval<T>());
+
+template <class T>
+constexpr bool is_pointer_v = os::detect_v<is_pointer, T>;
+
 namespace detail {
 
 template <class T>
@@ -42,17 +48,15 @@ struct ContainerType_impl<T, std::enable_if_t<is_container_v<T>>> {
 template <typename T>
 using ContainerType = typename ContainerType_impl<T>::type;
 
-struct ArgsTypeGetter {
+struct DummyFunctor {
     template <class... Args>
-    auto operator()(Args&&...) {
-        return os::TypePack<ContainerType<Args>...>{};
-    }
+    auto operator()(Args...) {}
 };
 
 }  // namespace detail
 
 template <class Object>
-using has_serialize = decltype(std::declval<Object>().serialize(detail::ArgsTypeGetter{}));
+using has_serialize = decltype(std::declval<Object>().serialize(detail::DummyFunctor{}));
 
 template <class T>
 constexpr bool has_serialize_v = os::detect_v<has_serialize, T>;
@@ -70,19 +74,32 @@ auto As(U&& u) {
 
 namespace detail {
 
+template <typename Stream>
+struct ArgsTypeGetter;
+
 template <class Stream>
 struct StreamTypes {
     template <class T>
     static auto get() {
-        if constexpr (is_container_v<T>) {
-            return ContainerType<T>{};
+        if constexpr (is_pointer_v<T>) {
+            return get<decltype(*std::declval<T>())>();
+        } else if constexpr (is_container_v<T>) {
+            return ContainerTypeWrap<decltype(get<typename T::value_type>())>{};
         } else if constexpr (has_serialize_v<T>) {
-            return decltype(std::declval<T>().serialize(ArgsTypeGetter{})){};
+            return decltype(std::declval<T>().serialize(ArgsTypeGetter<Stream>{})){};
         } else if constexpr (has_left_stream_v<Stream, T>) {
-            return T{};
+            return std::decay_t<T>{};
         } else {
-            return decltype(os::bind_to_members(ArgsTypeGetter{}, std::declval<T>())){};
+            return decltype(os::bind_to_members(ArgsTypeGetter<Stream>{}, std::declval<T>())){};
         }
+    }
+};
+
+template <typename Stream>
+struct ArgsTypeGetter {
+    template <class... Args>
+    auto operator()(Args...) {
+        return os::TypePack<decltype(StreamTypes<Stream>::template get<Args>())...>{};
     }
 };
 
@@ -99,14 +116,16 @@ struct stream_compatible<Stream, LHS, RHS, std::enable_if_t<std::is_same_v<LHS, 
 }  // namespace detail
 
 template <class Stream, class LHS, class RHS>
-constexpr bool stream_compatible_v = detail::stream_compatible<Stream, LHS, RHS>::value;
+constexpr bool stream_compatible_v = detail::stream_compatible<Stream, std::decay_t<LHS>, std::decay_t<RHS>>::value;
 
 template <class Stream>
 struct To {
     template <class Object, class AsType = Object>
     To& operator<<(Object&& object) {
         static_assert(stream_compatible_v<Stream, Object, AsType>, "Stream::As with incompatible types");
-        if constexpr (is_container_v<Object>) {
+        if constexpr (is_pointer_v<Object>) {
+            *this << *object;
+        } else if constexpr (is_container_v<Object>) {
             *this << object.size();
             for (auto& val : object) {
                 *this << val;
@@ -129,7 +148,9 @@ struct To {
     template <class Object, class AsType = Object>
     To& operator>>(Object&& object) {
         static_assert(stream_compatible_v<Stream, Object, AsType>, "Stream::As with incompatible types");
-        if constexpr (is_container_v<Object>) {
+        if constexpr (is_pointer_v<Object>) {
+            *this >> *object;
+        } else if constexpr (is_container_v<Object>) {
             std::size_t count;
             *this >> count;
             object.resize(count);
