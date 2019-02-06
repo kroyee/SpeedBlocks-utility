@@ -38,13 +38,14 @@ class PacketManager {
         }
     }
 
-    template <class AsType, class Data>
-    void write_as(Data&& data) {
-        if constexpr (std::is_empty_v<AsType>) {
-            m_packet << get_packet_id<AsType>();
+    template <class AsType, class... Data>
+    void write_as(Data&&... data) {
+        m_packet << get_packet_id<AsType>();
+        if (sizeof...(Data) == 1) {
+            m_packet.template operator<<<Data..., AsType>(data);
         } else {
-            m_packet << get_packet_id<AsType>();
-            m_packet.template operator<<<Data, AsType>(data);
+            auto tup = std::tie(data...);
+            m_packet.template operator<<<decltype(tup), AsType>(tup);
         }
     }
 
