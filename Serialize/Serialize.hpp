@@ -32,7 +32,7 @@ constexpr bool is_pointer_v = os::detect_v<is_pointer, T>;
 
 namespace detail {
 
-template <class T>
+template <class... T>
 struct ContainerTypeWrap {};
 
 template <typename T, class = void>
@@ -50,7 +50,7 @@ using ContainerType = typename ContainerType_impl<T>::type;
 
 struct DummyFunctor {
     template <class... Args>
-    auto operator()(Args...) {}
+    auto operator()(Args&&...) {}
 };
 
 }  // namespace detail
@@ -98,9 +98,44 @@ struct StreamTypes {
 template <typename Stream>
 struct ArgsTypeGetter {
     template <class... Args>
-    auto operator()(Args...) {
-        return os::TypePack<decltype(StreamTypes<Stream>::template get<Args>())...>{};
+    auto operator()(Args&&...) {
+        return os::TypePack<decltype(StreamTypes<Stream>::template get<std::decay_t<Args>>())...>{};
     }
+};
+
+template <class T, class U>
+struct remove_inner_typepack;
+
+template <template <class...> class Pack, class... T, class... U>
+struct remove_inner_typepack<Pack<T...>, Pack<U...>> {
+    using type = Pack<U...>;
+};
+
+template <template <class...> class Pack, class First, class... Rest, class... U>
+struct remove_inner_typepack<Pack<First, Rest...>, Pack<U...>> {
+    using type = typename remove_inner_typepack<Pack<Rest...>, Pack<U..., First>>::type;
+};
+
+template <template <class...> class Pack, class... inner_types, class... U>
+struct remove_inner_typepack<Pack<ContainerTypeWrap<inner_types...>>, Pack<U...>> {
+    using wrap = typename remove_inner_typepack<ContainerTypeWrap<inner_types...>, ContainerTypeWrap<>>::type;
+    using type = typename remove_inner_typepack<Pack<>, Pack<U..., wrap>>::type;
+};
+
+template <template <class...> class Pack, class... inner_types, class... T, class... U>
+struct remove_inner_typepack<Pack<ContainerTypeWrap<inner_types...>, T...>, Pack<U...>> {
+    using wrap = typename remove_inner_typepack<ContainerTypeWrap<inner_types...>, ContainerTypeWrap<>>::type;
+    using type = typename remove_inner_typepack<Pack<T...>, Pack<U..., wrap>>::type;
+};
+
+template <template <class...> class Pack, class... inner_types, class... U>
+struct remove_inner_typepack<Pack<os::TypePack<inner_types...>>, Pack<U...>> {
+    using type = typename remove_inner_typepack<Pack<inner_types...>, Pack<U...>>::type;
+};
+
+template <template <class...> class Pack, class... inner_types, class... T, class... U>
+struct remove_inner_typepack<Pack<os::TypePack<inner_types...>, T...>, Pack<U...>> {
+    using type = typename remove_inner_typepack<Pack<inner_types..., T...>, Pack<U...>>::type;
 };
 
 template <class T>
@@ -114,7 +149,8 @@ struct add_outer_typepack<os::TypePack<T>> {
 };
 
 template <class Stream, class T>
-using get_stream_types_t = typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type;
+using get_stream_types_t = typename remove_inner_typepack<typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type, os::TypePack<>>::type;
+// using get_stream_types_t = typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type;
 
 template <class Stream, class LHS, class RHS, class = void>
 struct stream_compatible {

@@ -12,6 +12,27 @@
 
 namespace os {
 
+namespace detail {
+
+template <class Is, class T>
+struct PackAsObject;
+
+template <std::size_t... Is, class T>
+struct PackAsObject<std::index_sequence<Is...>, T> {
+    PackAsObject(T&& t) : tuple(t) {}
+    T& tuple;
+
+    template <class F>
+    auto serialize(F f) {
+        return f(std::get<Is>(tuple)...);
+    }
+};
+
+template <class T>
+PackAsObject(T&& t)->PackAsObject<std::make_index_sequence<std::tuple_size_v<T>>, T>;
+
+}  // namespace detail
+
 template <typename PacketClass>
 class PacketManager {
    public:
@@ -44,8 +65,8 @@ class PacketManager {
         if (sizeof...(Data) == 1) {
             m_packet.template operator<<<Data..., AsType>(data);
         } else {
-            auto tup = std::tie(data...);
-            m_packet.template operator<<<decltype(tup), AsType>(tup);
+            auto o = detail::PackAsObject(std::forward_as_tuple(std::forward<Data>(data)...));
+            m_packet.template operator<<<decltype(o), AsType>(tup);
         }
     }
 
