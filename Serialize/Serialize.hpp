@@ -150,7 +150,6 @@ struct add_outer_typepack<os::TypePack<T>> {
 
 template <class Stream, class T>
 using get_stream_types_t = typename remove_inner_typepack<typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type, os::TypePack<>>::type;
-// using get_stream_types_t = typename add_outer_typepack<decltype(StreamTypes<Stream>::template get<T>())>::type;
 
 template <class Stream, class LHS, class RHS, class = void>
 struct stream_compatible {

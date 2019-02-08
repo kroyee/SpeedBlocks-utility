@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 #include "../Serialize/Serialize.hpp"
@@ -46,7 +47,7 @@ class PacketManager {
     void read() {
         uint8_t id;
         while (m_packet >> id) {
-            packet_array_stream_right[id](packet);
+            packet_array_stream_right[id](m_packet);
         }
     }
 
@@ -62,11 +63,11 @@ class PacketManager {
     template <class AsType, class... Data>
     void write_as(Data&&... data) {
         m_packet << get_packet_id<AsType>();
-        if (sizeof...(Data) == 1) {
-            m_packet.template operator<<<Data..., AsType>(data);
+        if constexpr (sizeof...(Data) == 1) {
+            m_packet.template operator<<<Data..., AsType>(std::forward<Data>(data)...);
         } else {
             auto o = detail::PackAsObject(std::forward_as_tuple(std::forward<Data>(data)...));
-            m_packet.template operator<<<decltype(o), AsType>(tup);
+            m_packet.template operator<<<decltype(o), AsType>(std::move(o));
         }
     }
 
@@ -74,6 +75,21 @@ class PacketManager {
     void write() {
         static_assert(std::is_empty_v<Packet>, "write called without data on non-empty Packet type");
         m_packet << get_packet_id<Packet>();
+    }
+
+    template <class AsType, class... Data>
+    static PacketManager make(Data&&... data) {
+        PacketManager packet;
+        packet.m_packet << get_packet_id<AsType>();
+        if constexpr (sizeof...(Data) == 1) {
+            packet.m_packet.template operator<<<Data..., AsType>(std::forward<Data>(data)...);
+        } else if constexpr (sizeof...(Data) > 1) {
+            auto o = detail::PackAsObject(std::forward_as_tuple(std::forward<Data>(data)...));
+            packet.m_packet.template operator<<<decltype(o), AsType>(std::move(o));
+        } else {
+            static_assert(std::is_empty_v<AsType>, "AsType is not empty, but no parameters passed in");
+        }
+        return packet;
     }
 
     template <class Func>
@@ -101,6 +117,7 @@ class PacketManager {
     PacketClass& get_packet() { return m_packet; }
     typename PacketClass::StreamType& get_base_packet() { return m_packet; }
     operator typename PacketClass::StreamType&() { return m_packet; }
+    operator const typename PacketClass::StreamType&() const { return m_packet; }
 
     void clear() { m_packet = PacketClass{}; }
 

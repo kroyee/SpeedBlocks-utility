@@ -76,11 +76,11 @@ PACKET(NP_Ping) {
 
 PACKET(NP_JoinRoom) { uint16_t roomID = 0; };
 
-PACKET(NP_LinesSent) { uint16_t amount = 0; };
+PACKET(NP_LinesSent) { uint8_t amount = 0; };
 
-PACKET(NP_GarbageCleared) { uint16_t amount = 0; };
+PACKET(NP_GarbageCleared) { uint8_t amount = 0; };
 
-PACKET(NP_LinesBlocked) { uint16_t amount = 0; };
+PACKET(NP_LinesBlocked) { uint8_t amount = 0; };
 
 PACKET(NP_TournamentJoin) { uint16_t tournamentID = 0; };
 
@@ -238,7 +238,7 @@ struct TournamentInfo {
     uint16_t id;
     std::string name;
     uint8_t status;
-    uint8_t players;
+    uint16_t players;
 };
 
 PACKET(NP_TournamentList) { std::vector<TournamentInfo> tournaments; };
@@ -292,6 +292,7 @@ PACKET(NP_TournamentGameReady) {
 PACKET(NP_CountdownStart) {
     uint16_t seed1;
     uint16_t seed2;
+    uint8_t status;
 };
 
 PACKET(NP_CountdownStop) { uint8_t status; };
@@ -311,7 +312,7 @@ PACKET(NP_ClientNotAway) { uint16_t id; };
 
 PACKET(NP_PlayerPosition) {
     uint16_t id;
-    uint16_t position;
+    uint8_t position;
 };
 
 PACKET(NP_ClientReady) { uint16_t id; };
