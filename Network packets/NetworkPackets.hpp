@@ -12,8 +12,8 @@ using PM = os::PacketManager<Stream::To<sf::Packet>>;
 // Client outgoing
 
 PACKET(NP_Replay) {
-    uint16_t type;
-    uint16_t id;
+    uint16_t type = 0;
+    uint16_t id = 0;
     std::string name;
     std::vector<uint8_t> data;
 };
@@ -25,23 +25,23 @@ PACKET(NP_LoginRequest) {
 };
 
 struct RoundScore {
-    uint8_t max_combo;
-    uint16_t lines_sent;
-    uint16_t lines_recieved;
-    uint16_t lines_blocked;
-    uint16_t bpm;
+    uint8_t max_combo = 0;
+    uint16_t lines_sent = 0;
+    uint16_t lines_recieved = 0;
+    uint16_t lines_blocked = 0;
+    uint16_t bpm = 0;
 };
 
 PACKET(NP_GameOver) {
     RoundScore score;
-    uint32_t duration;
-    uint16_t piece_count;
+    uint32_t duration = 0;
+    uint16_t piece_count = 0;
 };
 
 PACKET(NP_Winner) {
     RoundScore score;
-    uint32_t duration;
-    uint16_t piece_count;
+    uint32_t duration = 0;
+    uint16_t piece_count = 0;
 };
 
 PACKET(NP_ChatMsg) {
@@ -61,17 +61,17 @@ PACKET(NP_CreateTournament) {
     uint8_t rounds = 0;
 };
 
-PACKET(NP_ConfirmUdp) { uint16_t id; };
+PACKET(NP_ConfirmUdp) { uint16_t id = 0; };
 
 PACKET(NP_Gamestate) {
-    uint16_t id;
-    uint8_t count;
+    uint16_t id = 0;
+    uint8_t count = 0;
     std::vector<uint8_t> data;
 };
 
 PACKET(NP_Ping) {
-    uint16_t client_id;
-    uint8_t ping_id;
+    uint16_t client_id = 0;
+    uint8_t ping_id = 0;
 };
 
 PACKET(NP_JoinRoom) { uint16_t roomID = 0; };
@@ -129,33 +129,33 @@ SIGNAL(NP_MatchmakingLeave);
 // Server outgoing
 
 struct RoomInfo {
-    uint16_t id;
+    uint16_t id = 0;
     std::string name;
-    uint8_t currentPlayers;
-    uint8_t maxPlayers;
+    uint8_t currentPlayers = 0;
+    uint8_t maxPlayers = 0;
 };
 
 struct ClientInfo {
-    uint16_t id;
+    uint16_t id = 0;
     std::string name;
 };
 
 PACKET(NP_Welcome) {
-    uint16_t yourID;
+    uint16_t yourID = 0;
     std::string message;
 };
 
 PACKET(NP_ClientList) { std::vector<ClientInfo> clients; };
 
 PACKET(NP_Matchmaking) {
-    uint16_t matchmakingQueue;
-    uint16_t matchmakingPlaying;
+    uint16_t matchmakingQueue = 0;
+    uint16_t matchmakingPlaying = 0;
 };
 
 PACKET(NP_ReplaySend){};
 
 struct ChallengeInfo {
-    uint16_t id;
+    uint16_t id = 0;
     std::string name;
     std::string label;
 };
@@ -163,15 +163,15 @@ struct ChallengeInfo {
 PACKET(NP_ChallengeList) { std::vector<ChallengeInfo> challenges; };
 
 PACKET(NP_JoinResponse) {
-    uint16_t status;
-    uint16_t seed1, seed2;
+    uint16_t status = 0;
+    uint16_t seed1 = 0, seed2 = 0;
     std::vector<ClientInfo> players;
 };
 
 PACKET(NP_ClientJoinedRoom) { ClientInfo player; };
 
 struct ListEntryTitle {
-    uint16_t x_pos;
+    uint16_t x_pos = 0;
     std::string text;
 };
 
@@ -185,12 +185,12 @@ struct ChallengeScore {
 };
 
 PACKET(NP_ChallengeLeaderboard) {
-    uint16_t id;
+    uint16_t id = 0;
     std::vector<ListEntryTitle> columns;
     std::vector<ChallengeScore> scores;
 };
 
-PACKET(NP_JoinChallenge) { uint16_t id; };
+PACKET(NP_JoinChallenge) { uint16_t id = 0; };
 
 PACKET(NP_ReplayRequest) { std::string message; };
 
@@ -198,22 +198,22 @@ PACKET(NP_ChallengeNotRecord) { std::string message; };
 
 struct RoundScoreServer {
     RoundScore score;
-    uint16_t id;
-    uint8_t ffa_rank;
-    uint8_t position;
-    uint16_t game_score;
-    float lines_adjusted;
-    uint16_t ffa_points;
+    uint16_t id = 0;
+    uint8_t ffa_rank = 0;
+    uint8_t position = 0;
+    uint16_t game_score = 0;
+    float lines_adjusted = 0;
+    uint16_t ffa_points = 0;
 };
 
 PACKET(NP_RoomScore) {
-    uint16_t round_lenght;
+    uint16_t round_lenght = 0;
     std::vector<RoundScoreServer> scores;
 };
 
 PACKET(NP_AuthResult) {
-    uint8_t status;
-    uint16_t id;
+    uint8_t status = 0;
+    uint16_t id = 0;
     std::string name;
 };
 
@@ -223,110 +223,110 @@ PACKET(NP_RoomList) { std::vector<RoomInfo> rooms; };
 
 PACKET(NP_RoomAdd) { RoomInfo room; };
 
-PACKET(NP_RoomRemove) { uint16_t id; };
+PACKET(NP_RoomRemove) { uint16_t id = 0; };
 
 PACKET(NP_MatchMaking) {
-    uint16_t queue;
-    uint16_t playing;
+    uint16_t queue = 0;
+    uint16_t playing = 0;
 };
 
 PACKET(NP_ClientJoinedServer) { ClientInfo player; };
 
-PACKET(NP_ClientLeftServer) { uint16_t id; };
+PACKET(NP_ClientLeftServer) { uint16_t id = 0; };
 
 struct TournamentInfo {
-    uint16_t id;
+    uint16_t id = 0;
     std::string name;
-    uint8_t status;
-    uint16_t players;
+    uint8_t status = 0;
+    uint16_t players = 0;
 };
 
 PACKET(NP_TournamentList) { std::vector<TournamentInfo> tournaments; };
 
 struct TournamentScore {
-    uint8_t sets;
+    uint8_t sets = 0;
     std::vector<uint8_t> rounds;
 };
 
 struct TournamentGame {
-    uint16_t id;
-    uint8_t depth;
-    uint8_t status;
+    uint16_t id = 0;
+    uint8_t depth = 0;
+    uint8_t status = 0;
     std::vector<ClientInfo> players;
     std::vector<TournamentScore> scores;
 };
 
 PACKET(NP_TournamentInfo) {
-    uint16_t id;
-    uint8_t grade;
-    uint8_t rounds;
-    uint8_t sets;
-    uint64_t start_time;
+    uint16_t id = 0;
+    uint8_t grade = 0;
+    uint8_t rounds = 0;
+    uint8_t sets = 0;
+    uint64_t start_time = 0;
     std::vector<ClientInfo> players;
     std::vector<uint16_t> moderators;
-    uint8_t status;
+    uint8_t status = 0;
     std::vector<TournamentGame> games;
 };
 
 struct GameScore {
-    uint16_t id;
-    uint8_t sets;
-    uint8_t rounds;
-    uint8_t status;
+    uint16_t id = 0;
+    uint8_t sets = 0;
+    uint8_t rounds = 0;
+    uint8_t status = 0;
 };
 
 PACKET(NP_GameScore) { std::vector<GameScore> scores; };
 
 PACKET(NP_TournamentGames) {
-    uint16_t id;
+    uint16_t id = 0;
     std::vector<TournamentGame> games;
 };
 
-PACKET(NP_PingReply) { uint16_t ping; };
+PACKET(NP_PingReply) { uint16_t ping = 0; };
 
 PACKET(NP_TournamentGameReady) {
-    uint16_t tournament_id;
-    uint16_t game_id;
+    uint16_t tournament_id = 0;
+    uint16_t game_id = 0;
 };
 
 PACKET(NP_CountdownStart) {
-    uint16_t seed1;
-    uint16_t seed2;
-    uint8_t status;
+    uint16_t seed1 = 0;
+    uint16_t seed2 = 0;
+    uint8_t status = 0;
 };
 
-PACKET(NP_CountdownStop) { uint8_t status; };
+PACKET(NP_CountdownStop) { uint8_t status = 0; };
 
-PACKET(NP_Countdown) { uint16_t countdown; };
+PACKET(NP_Countdown) { uint16_t countdown = 0; };
 
-PACKET(NP_ClientLeftRoom) { uint16_t id; };
+PACKET(NP_ClientLeftRoom) { uint16_t id = 0; };
 
 PACKET(NP_RoundStart) {
-    uint16_t seed1;
-    uint16_t seed2;
+    uint16_t seed1 = 0;
+    uint16_t seed2 = 0;
 };
 
-PACKET(NP_ClientAway) { uint16_t id; };
+PACKET(NP_ClientAway) { uint16_t id = 0; };
 
-PACKET(NP_ClientNotAway) { uint16_t id; };
+PACKET(NP_ClientNotAway) { uint16_t id = 0; };
 
 PACKET(NP_PlayerPosition) {
-    uint16_t id;
-    uint8_t position;
+    uint16_t id = 0;
+    uint8_t position = 0;
 };
 
-PACKET(NP_ClientReady) { uint16_t id; };
+PACKET(NP_ClientReady) { uint16_t id = 0; };
 
-PACKET(NP_ClientNotReady) { uint16_t id; };
+PACKET(NP_ClientNotReady) { uint16_t id = 0; };
 
 PACKET(NP_Kick) { std::string message; };
 
 PACKET(NP_AvgBpm) {
-    uint16_t id;
-    uint16_t average_bpm;
+    uint16_t id = 0;
+    uint16_t average_bpm = 0;
 };
 
-PACKET(NP_TournamentTimeWo) { uint16_t time; };
+PACKET(NP_TournamentTimeWo) { uint16_t time = 0; };
 
 SIGNAL(NP_TournamentNotEnough);
 SIGNAL(NP_NotAsGuest);
