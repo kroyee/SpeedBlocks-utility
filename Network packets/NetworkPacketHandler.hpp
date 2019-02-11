@@ -6,6 +6,7 @@
 #include <tuple>
 #include <type_traits>
 #include <vector>
+#include "../Debug/Debug.hpp"
 #include "../Serialize/Serialize.hpp"
 #include "../Trigger/Trigger.hpp"
 #include "../helpers/MyTypeTraits.hpp"
@@ -47,6 +48,11 @@ class PacketManager {
     void read() {
         uint8_t id;
         while (m_packet >> id) {
+            DEBUG([&]() {
+                if (id != get_packet_id<NP_Ping>() && id != get_packet_id<NP_Gamestate>() && id) {
+                    std::cout << "Got packet " << packet_names[id] << std::endl;
+                }
+            });
             packet_array_stream_right[id](m_packet);
         }
     }
@@ -121,6 +127,17 @@ class PacketManager {
 
     void clear() { m_packet = PacketClass{}; }
 
+    template <typename T, int N = 255>
+    static constexpr uint8_t get_packet_id() {
+        if constexpr (N == 0) {
+            return 0;
+        } else if constexpr (std::is_same_v<typename PacketID<N>::type, std::decay_t<T>>) {
+            return N;
+        } else {
+            return get_packet_id<T, N - 1>();
+        }
+    }
+
    private:
     template <int N = 255>
     static void get_registered_functions() {
@@ -138,22 +155,15 @@ class PacketManager {
                     }
                 };
             }
+            packet_names[N] = PacketID<N>::name;
+        } else {
+            packet_array_stream_right[N] = [](PacketClass&) { std::cout << "Unknown packet " << N << std::endl; };
         }
         if constexpr (N != 0) get_registered_functions<N - 1>();
     }
 
-    template <typename T, int N = 255>
-    static constexpr uint8_t get_packet_id() {
-        if constexpr (N == 0) {
-            return 0;
-        } else if constexpr (std::is_same_v<typename PacketID<N>::type, std::decay_t<T>>) {
-            return N;
-        } else {
-            return get_packet_id<T, N - 1>();
-        }
-    }
-
     inline static std::array<std::function<void(PacketClass&)>, 256> packet_array_stream_right;
+    inline static std::array<std::string, 256> packet_names;
 
     PacketClass m_packet;
 };

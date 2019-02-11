@@ -2,6 +2,7 @@
 #define PACKETMACRO_HPP
 
 #include <functional>
+#include <string>
 
 // inline static CallbackCollection<type> callbacks;
 
@@ -12,6 +13,7 @@
     struct os::PacketManager<PacketClass>::PacketID<__COUNT##ER__ + 1, Dummy> { \
         using type = TYPE;                                                      \
         static inline std::function<void(PacketClass&)> target;                 \
+        static inline const std::string name = #TYPE;                           \
     };                                                                          \
     struct TYPE
 
@@ -21,6 +23,7 @@
     struct os::PacketManager<PacketClass>::template PacketID<__COUNT##ER__ + 1, Dummy> { \
         using type = TYPE;                                                               \
         static inline std::function<void(PacketClass&)> target;                          \
+        static inline const std::string name = #TYPE;                                    \
     }
 
 #define SIGNAL(TYPE)                                                            \
@@ -30,6 +33,7 @@
     struct os::PacketManager<PacketClass>::PacketID<__COUNT##ER__ + 1, Dummy> { \
         using type = TYPE;                                                      \
         static inline std::function<void(PacketClass&)> target;                 \
+        static inline const std::string name = #TYPE;                           \
     }
 
 #endif  // PACKETMACRO_HPP
