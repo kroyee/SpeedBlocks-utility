@@ -1,6 +1,7 @@
 #ifndef NETWORKPACKETS_HPP
 #define NETWORKPACKETS_HPP
 
+#include "../GUI serialize/GuiSerialize.hpp"
 #include "NetworkPacketHandler.hpp"
 
 namespace sf {
