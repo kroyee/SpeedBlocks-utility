@@ -48,8 +48,8 @@ class PacketManager {
     void read() {
         uint8_t id;
         while (m_packet >> id) {
-            DEBUG([&]() {
-                if (id != get_packet_id<NP_Ping>() && id != get_packet_id<NP_Gamestate>() && id) {
+            DEBUG_ONLY([&]() {
+                if (packet_names[id] != "NP_Ping" && packet_names[id] != "NP_Gamestate") {
                     std::cout << "Got packet " << packet_names[id] << std::endl;
                 }
             });

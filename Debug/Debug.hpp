@@ -5,12 +5,12 @@
 
 #ifdef DEBUG
 template <class F>
-void DEBUG(F&& f) {
+void DEBUG_ONLY(F&& f) {
     f();
 }
 #else
 template <class F>
-void DEBUG(F) {}
+void DEBUG_ONLY(F) {}
 #endif
 
 #endif
